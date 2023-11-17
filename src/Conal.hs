@@ -1,6 +1,9 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
 module Conal where
 -- import Control.Category (Category (id, (.)))
 import Control.Monad.State
@@ -135,6 +138,17 @@ instance BoolCat Graph where
   orC = genNode "or"
   xorC = genNode "xor"
 
+class InitialCat k a where
+  initial :: k () a
+
+instance GenPorts a => InitialCat Graph a where
+  initial = genNode "initial"
+
+terminalNode :: String -> Graph a ()
+terminalNode = genNode
+
+forkNode :: (GenPorts a) => Graph a (a, a)
+forkNode = genNode "fork"
 
 -- part of Control.Monad.State.Lazy:
 -- modify :: MonadState s m => (s -> s) -> m ()
@@ -152,15 +166,33 @@ test3 ::(MonoidalCat k, BoolCat k) => k (Bool, Bool) Bool
 test3 =
   bimap C.id notC >>> andC
 
--- test4 :: (MonoidalCat k)
+halfAdder :: (MonoidalCat k, BoolCat k) => k (Bool, Bool) (Bool, Bool)
+halfAdder = copy >>> bimap xorC andC
 
+test4 :: (MonoidalCat k, BoolCat k, InitialCat k Bool) => k () ()
+test4 = initial >>> notC >>> consume
+
+test5 :: Graph () ()
+test5 = genNode "x" >>> notC >>> genNode "y"
+
+test6 :: Graph () ()
+test6 = copy >>> bimap (genNode "x") (genNode "y") >>> andC >>> genNode "a"
+
+test7 :: Graph () ()
+test7 = copy
+  >>> bimap (genNode "x") (genNode "y")
+  >>> forkNode >>> bimap xorC andC
+  >>> bimap (terminalNode "s") (terminalNode "c")
+  >>> consume
 
 toGraph :: Graph a b -> Graph a b
 toGraph = Prelude.id
 
 toFun :: (a -> b) -> (a -> b)
 toFun = Prelude.id
--- want something with type k a b -> k a c -> k b d -> k c d
 
 largePairPort :: Ports (Bool, Bool)
 largePairPort = PairP (BoolP 100) (BoolP 101)
+
+exampleOut :: [Node]
+exampleOut = snd C.. snd $ runGraph test7 UnitP

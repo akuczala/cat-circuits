@@ -28,6 +28,7 @@ library
       Conal
       ConalCats
       Lib
+      ParseGraph
       Serial
   other-modules:
       Paths_catalyst_experiments

@@ -1,0 +1,10 @@
+digraph G {
+    and -> c
+    xor -> s
+    fork -> and
+    fork -> and
+    fork -> xor
+    fork -> xor
+    x -> fork
+    y -> fork
+}
