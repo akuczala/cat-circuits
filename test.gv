@@ -1,18 +1,30 @@
 digraph G {
-    or_2 -> cout_0
-    and_3 -> s_1
-    and_6 -> or_2
-    xor_4 -> or_2
-    fork_5 -> and_3
-    fork_5 -> and_3
-    fork_5 -> xor_4
-    fork_5 -> xor_4
-    cin_11 -> fork_5
-    xor_7 -> fork_5
-    fork_8 -> and_6
-    fork_8 -> and_6
-    fork_8 -> xor_7
-    fork_8 -> xor_7
-    a_10 -> fork_8
-    b_9 -> fork_8
+n0 [label=cout]
+n1 [label=s]
+n2 [label=or]
+n3 [label=and]
+n4 [label=xor]
+n5 [label=fork]
+n6 [label=and]
+n7 [label=xor]
+n8 [label=fork]
+n9 [label=b]
+n10 [label=a]
+n11 [label=cin]
+n2 -> n0
+n3 -> n1
+n6 -> n2
+n4 -> n2
+n5 -> n3
+n5 -> n3
+n5 -> n4
+n5 -> n4
+n11 -> n5
+n7 -> n5
+n8 -> n6
+n8 -> n6
+n8 -> n7
+n8 -> n7
+n10 -> n8
+n9 -> n8
 }
