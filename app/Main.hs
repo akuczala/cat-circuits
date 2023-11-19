@@ -1,8 +1,7 @@
 module Main (main) where
 
-import Lib
 import ParseGraph (translateGraph)
-import Conal (exampleOut)
+import Examples (exampleOut)
 
 main :: IO ()
 main = do

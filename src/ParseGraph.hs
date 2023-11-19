@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs #-}
 module ParseGraph (translateGraph) where
-import Conal
 import Data.List (nub)
+import Graph
 
 data NodeData = NodeData {
     nodeId :: Int,

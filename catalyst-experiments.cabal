@@ -25,11 +25,12 @@ source-repository head
 
 library
   exposed-modules:
-      Conal
-      ConalCats
-      Lib
+      BoolCat
+      CustomCats
+      Examples
+      Graph
       ParseGraph
-      Serial
+      Utils
   other-modules:
       Paths_catalyst_experiments
   autogen-modules:
