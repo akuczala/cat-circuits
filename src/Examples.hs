@@ -53,7 +53,7 @@ test7 = copy
 test8 :: Graph () ()
 test8 = copy
   >>> initialNode "cin" *** pairInput "x" "y"
-  >>> fullAdder (halfAdderFork forkNode)
+  >>> fullAdder (halfAdderFork copy)
   >>> terminalNode "s" *** terminalNode "cout"
   >>> consume
 

@@ -1,31 +1,20 @@
 digraph G {
-    node [colorscheme=oranges9]
     n0 [label=cout]
     n1 [label=s]
     n2 [label=or]
     n3 [label=and]
     n4 [label=xor]
-    n5 [label=fork]
-    n6 [label=and]
-    n7 [label=xor]
-    n8 [label=fork]
-    n9 [label=y]
-    n10 [label=x]
-    n11 [label=cin]
-    n2 -> n0
-    n3 -> n1
-    n6 -> n2
-    n4 -> n2
-    n5 -> n3
-    n5 -> n3
-    n5 -> n4
-    n5 -> n4
-    n11 -> n5
-    n7 -> n5
-    n8 -> n6
-    n8 -> n6
-    n8 -> n7
-    n8 -> n7
-    n10 -> n8
-    n9 -> n8
+    n5 [label=and]
+    n6 [label=xor]
+    n7 [label=y]
+    n8 [label=x]
+    n9 [label=cin]
+    n2 -> {n0}
+    n3 -> {n1}
+    n5 -> {n2}
+    n4 -> {n2}
+    n9 -> {n4,n3}
+    n6 -> {n4,n3}
+    n8 -> {n6,n5}
+    n7 -> {n6,n5}
 }

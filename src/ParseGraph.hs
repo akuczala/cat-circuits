@@ -1,7 +1,8 @@
 {-# LANGUAGE GADTs #-}
-module ParseGraph (translateGraph) where
-import Data.List (nub)
+module ParseGraph (translateGraph, serializeGraph) where
+import Data.List (nub, intercalate)
 import Graph
+import Utils
 
 data NodeData = NodeData {
     nodeId :: Int,
@@ -28,31 +29,41 @@ parseNode i (Node name pIn pOut) = NodeData {
 allPorts :: [NodeData] -> [Port]
 allPorts nodes = nub $ concatMap inPorts nodes
 
-data NodePair = NodePair {fromNode :: Maybe NodeData, toNode :: Maybe NodeData}
+
+data PortNodes = PortNodes {fromNode :: OnlyOne NodeData, toNodes :: [NodeData]}
     deriving Show
 
-findPortNodePair :: Port -> [NodeData] -> (Maybe NodeData, Maybe NodeData)
-findPortNodePair port = foldl go (Nothing, Nothing) where
-    go pair node@(NodeData _ _ inPorts outPorts) = case (outPorts, inPorts) of
-        _ | port `elem` outPorts -> (Just node, snd pair)
-        _ | port `elem` inPorts -> (fst pair, Just node)
-        _ -> pair
+-- supports only ports with a single origin and multiple targets
+findPortNodes :: Port -> [NodeData] -> PortNodes
+findPortNodes port = foldl go PortNodes {fromNode=NothingYet, toNodes=[]} where
+    go :: PortNodes -> NodeData -> PortNodes
+    go pNodes node@(NodeData _ _ inPorts outPorts) = case (outPorts, inPorts) of
+        _ | port `elem` outPorts -> pNodes{fromNode = addAnother node (fromNode pNodes)}
+        _ | port `elem` inPorts -> pNodes {toNodes = node : toNodes pNodes}
+        _ -> pNodes
 
-nodeIdToString :: Int -> String 
+nodeIdToString :: Int -> String
 nodeIdToString i = "n" ++ show i
 
 nodeString :: NodeData -> String
 nodeString node = (nodeIdToString . nodeId) node ++ " [label=" ++ nodeLabel node ++ "]"
 
-serializePair :: (Maybe NodeData, Maybe NodeData) -> String
-serializePair (Just n1, Just n2) = nodeIdToString (nodeId n1) ++ " -> " ++ nodeIdToString ( nodeId n2)
-serializePair _ = "INVALID"
+serializePortNodes :: PortNodes -> String
+serializePortNodes pNodes = serializedInNodes ++ " -> " ++ serializedOutNodes where
+    serializedInNodes = case fromNode pNodes of
+        OnlyOne node -> nodeIdToString (nodeId node)
+        NothingYet -> "INVALID: Must have single origin node but got 0"
+        TooMany -> "INVALID: Must have single origin node but got > 1"
+    serializedOutNodes = "{" ++ intercalate "," (map (nodeIdToString . nodeId) (toNodes pNodes)) ++ "}"
 
-translateGraph :: [Node] -> [String]
-translateGraph inNodes = nodeStrings ++ edgeStrings
+translateGraph :: [Node] -> ([NodeData], [Port])
+translateGraph inNodes = (nodes, ports) where
+    nodes = zipWith parseNode [0..] inNodes
+    ports = allPorts nodes
+
+serializeGraph :: [Node] -> [String]
+serializeGraph inNodes = nodeStrings ++ edgeStrings
     where
-        nodes = zipWith parseNode [0..] inNodes
-        ports = allPorts nodes
+        (nodes, ports) = translateGraph inNodes
         nodeStrings = map nodeString nodes
-        edgeStrings = map (serializePair . flip findPortNodePair nodes) ports
-
+        edgeStrings = map (serializePortNodes . flip findPortNodes nodes) ports
