@@ -11,9 +11,9 @@ parsePorts (BoolP p) = [p]
 parsePorts (IntP p) = [p]
 parsePorts (PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
 
-parseNode :: Node -> NodeData
-parseNode (Node name pIn pOut) = NodeData {
-    name = name,
+parseNode :: Int -> Node -> NodeData
+parseNode i (Node name pIn pOut) = NodeData {
+    name = name ++ "_" ++ show i,
     inPorts = parsePorts pIn,
     outPorts = parsePorts pOut
     }
@@ -38,6 +38,6 @@ serializePair _ = "INVALID"
 translateGraph :: [Node] -> [String]
 translateGraph inNodes = map (serializePair . flip findPortNodePair nodes) ports
     where
-        nodes = map parseNode inNodes
+        nodes = zipWith parseNode [0..] inNodes
         ports = allPorts nodes
 
