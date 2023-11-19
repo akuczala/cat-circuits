@@ -10,8 +10,8 @@ class Cartesian k => BoolCat k where
 
 instance BoolCat (->) where
   notC = not
-  andC = and
-  orC = or
+  andC = uncurry (&&)
+  orC = uncurry (||)
   xorC (x, y) = x /= y
 
 instance BoolCat Graph where

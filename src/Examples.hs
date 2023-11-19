@@ -19,8 +19,8 @@ test3 ::(Bimap k, BoolCat k) => k (Bool, Bool) Bool
 test3 =
   bimap C.id notC >>> andC
 
-halfAdder :: (Bimap k, BoolCat k) => k (Pair Bool) (Pair Bool)
-halfAdder = copy >>> bimap xorC andC
+halfAdder :: BoolCat k => k (Pair Bool) (Pair Bool)
+halfAdder = copy >>> xorC *** andC
 
 halfAdderFork :: Graph (Pair Bool) (Pair (Pair Bool)) -> Graph (Pair Bool) (Pair Bool)
 halfAdderFork fork = fork >>> bimap xorC andC
