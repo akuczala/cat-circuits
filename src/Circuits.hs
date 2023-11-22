@@ -6,6 +6,7 @@ import BoolCat
 import Utils
 import qualified Control.Category as C
 import Control.Category.Monoidal
+    ( MonoidalProduct((***)), SymmetricProduct(swap, reassoc) )
 import Control.Category ((>>>))
 import Control.Category.Cartesian
 

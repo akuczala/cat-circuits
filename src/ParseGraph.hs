@@ -17,6 +17,7 @@ parsePorts UnitP = []
 parsePorts (BoolP p) = [p]
 parsePorts (IntP p) = [p]
 parsePorts (PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
+parsePorts (VecP v) = concatMap parsePorts v
 
 parseNode :: Int -> Node -> NodeData
 parseNode i (Node name pIn pOut) = NodeData {
@@ -42,11 +43,20 @@ findPortNodes port = foldl go PortNodes {fromNode=NothingYet, toNodes=[]} where
         _ | port `elem` inPorts -> pNodes {toNodes = node : toNodes pNodes}
         _ -> pNodes
 
+nodeLabelToShape :: String -> String
+nodeLabelToShape "not" = "invtriangle"
+nodeLabelToShape "or" = "invhouse"
+nodeLabelToShape "and" = "invtrapezium"
+nodeLabelToShape _ = "ellipse"
+
 nodeIdToString :: Int -> String
 nodeIdToString i = "n" ++ show i
 
 nodeString :: NodeData -> String
-nodeString node = (nodeIdToString . nodeId) node ++ " [label=" ++ nodeLabel node ++ "]"
+nodeString node = idStr ++ " [label=" ++ label ++ ", shape=" ++ shape ++ "]" where
+    idStr = (nodeIdToString . nodeId) node
+    label = nodeLabel node
+    shape = nodeLabelToShape (nodeLabel node)
 
 serializePortNodes :: PortNodes -> String
 serializePortNodes pNodes = serializedInNodes ++ " -> " ++ serializedOutNodes where

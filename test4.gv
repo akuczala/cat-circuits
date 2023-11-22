@@ -1,0 +1,17 @@
+digraph G {
+n0 [label=s_c, shape=ellipse]
+n1 [label=or, shape=invhouse]
+n2 [label=and, shape=invtrapezium]
+n3 [label=xor, shape=ellipse]
+n4 [label=and, shape=invtrapezium]
+n5 [label=xor, shape=ellipse]
+n6 [label=c_x_y, shape=ellipse]
+n2 -> {n0}
+n1 -> {n0}
+n4 -> {n1}
+n3 -> {n1}
+n6 -> {n3,n2}
+n5 -> {n3,n2}
+n6 -> {n5,n4}
+n6 -> {n5,n4}
+}

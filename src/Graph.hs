@@ -7,6 +7,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE DataKinds #-}
 module Graph where
 
 import Control.Monad.State
@@ -17,6 +18,8 @@ import Control.Category as C
 import Control.Category.Cartesian (Cartesian(..))
 import Control.Category.Monoidal (SymmetricProduct(..), MonoidalProduct(..))
 import CustomCats (Bimap(..))
+import qualified Data.Vector.Sized as V
+import GHC.TypeNats
 
 
 newtype Graph a b = Graph(Ports a -> GraphM (Ports b))
@@ -33,6 +36,7 @@ data Ports a where
     BoolP :: Port -> Ports Bool
     IntP :: Port -> Ports Int
     PairP :: Ports a -> Ports b -> Ports (a, b)
+    VecP :: V.Vector n (Ports a) -> Ports (V.Vector n a)
     -- FunP :: Graph a b -> Ports (a -> b)
 
 -- why does the below fail when I add the constraint Show a ?
@@ -41,6 +45,7 @@ instance Show (Ports a) where
   show (BoolP p) = "BoolP " ++ show p
   show (IntP p) = "IntP " ++ show p
   show (PairP ps1 ps2) = "PairP " ++ show ps1 ++ " " ++ show ps2
+  show (VecP ps) = "VecP " ++ show (fmap show ps) -- TODO this likely has too many quotations
 
 type NodeName = String
 
@@ -127,9 +132,7 @@ initialNode = genNode
 pairInput :: (GenPorts a, GenPorts b) => String -> String -> Graph () (a, b)
 pairInput x y = copy >>> genNode x *** genNode y
 
-
--- part of Control.Monad.State.Lazy:
--- modify :: MonadState s m => (s -> s) -> m ()
--- maps an old state to a new state, throwing away old state
--- nothing is returned, hence return type m ()
-
+instance (KnownNat n, GenPorts a) => GenPorts (V.Vector n a) where
+  genPorts = do
+    xs <- V.replicateM genPorts
+    return (VecP xs)

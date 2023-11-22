@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - catalyst
 - mtl
+- vector-sized
 
 ghc-options:
 - -Wall
