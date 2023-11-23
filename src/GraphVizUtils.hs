@@ -7,12 +7,12 @@ module GraphVizUtils(
 --import Data.GraphViz.Attributes.HTML (Table (..), Attribute (..), Cell (LabelCell), Label (..), TextItem (..), Row(..))
 import Data.GraphViz.Attributes.HTML
 import Data.Text.Lazy(pack, unpack)
-import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape), Label (HtmlLabel), Shape (PlainText))
+import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape), Label (HtmlLabel), Shape (..))
 import Data.List (intersperse)
 import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..), PrintDot (toDot), DotEdge (DotEdge))
 import Data.GraphViz.Printing (renderDot)
 
-import ParseGraph(PortData(..), NodeData(..), nodeIdToString, nodeLabelToString, PortNodes(..), findPortNodes)
+import ParseGraph(PortData(..), NodeData(..), nodeIdToString, nodeLabelToString, PortNodes(..), findPortNodes, NodeLabel(..), NodePortData(..))
 import Utils (OnlyOne(..))
 import Graph (Port)
 
@@ -47,15 +47,22 @@ portsRow ports = Cells [LabelCell [] (Table innerTable)] where
     innerTable = minimalTable [cells]
     cells = Cells $ [emptyCell] ++ intersperse emptyCell (map portCell ports) ++ [emptyCell]
 
-nodeRow :: String -> Row
-nodeRow name = Cells [cell] where
-    cell = LabelCell [Border 1, CellPadding 4] (toTextLabel name)
+nodeLabelToShape :: NodeLabel -> Shape
+nodeLabelToShape NotLabel= InvTriangle
+nodeLabelToShape OrLabel = InvHouse
+nodeLabelToShape AndLabel = InvTrapezium
+nodeLabelToShape _ = Ellipse
+
+nodeRow :: FancyNodeData -> Row
+nodeRow nodeData = Cells [cell] where
+    cell = LabelCell [Border 1, CellPadding 4, Style Rounded] (toTextLabel . fancyNodeName $ nodeData )
 
 data FancyNodeData = FancyNodeData {
     fancyNodeId :: String,
     fancyNodeName :: String,
     fancyNodeInPorts :: [PortData],
-    fancyNodeOutPorts :: [PortData]
+    fancyNodeOutPorts :: [PortData],
+    fancyNodeShape :: Shape -- unused
     }
     deriving Show
 
@@ -64,14 +71,15 @@ nodeDataToFancyNodeData nodeData = FancyNodeData {
     fancyNodeId = nodeIdToString $ nodeId nodeData,
     fancyNodeName = nodeLabelToString $ nodeLabel nodeData,
     fancyNodeInPorts = inPorts nodeData,
-    fancyNodeOutPorts = outPorts nodeData
+    fancyNodeOutPorts = outPorts nodeData,
+    fancyNodeShape = nodeLabelToShape $ nodeLabel nodeData
 }
 
 fancyNodeTable :: FancyNodeData -> Table
 fancyNodeTable nodeData = minimalTable rows where
     rows = [
         portsRow (fancyNodeInPorts nodeData),
-        nodeRow (fancyNodeName nodeData),
+        nodeRow nodeData,
         portsRow (fancyNodeOutPorts nodeData)
         ]
 
@@ -86,10 +94,10 @@ fancyNode nodeData = DotNode {
 
 -- TODO: include port information
 portNodesToEdge :: PortNodes -> [DotEdge String]
-portNodesToEdge pns = map makeEdge (toNodes pns) where
+portNodesToEdge pns = map (makeEdge . nodePortNode) (toNodePorts pns) where
     makeEdge n = DotEdge fnid (nodeIdToString $ nodeId n) []
-    fnid = case fromNode pns of
-        OnlyOne fn -> nodeIdToString $ nodeId fn
+    fnid = case fromNodePort pns of
+        OnlyOne fn -> nodeIdToString . nodeId . nodePortNode $ fn
         NothingYet -> "INVALID"
         TooMany -> "INVALID"
 
@@ -111,11 +119,11 @@ buildDotGraph nodeDatas ports = minimalDigraph nodes edges where
     nodes = map (fancyNode . nodeDataToFancyNodeData) nodeDatas
     edges = concatMap (portNodesToEdge . flip findPortNodes nodeDatas) ports
 
-testGraph :: DotNode n ->  DotGraph n
-testGraph node = minimalDigraph [node] []
-
 serializeDotGraph :: (PrintDot n) => DotGraph n -> String
 serializeDotGraph g = unpack $ renderDot $ toDot g
+
+testGraph :: DotNode n ->  DotGraph n
+testGraph node = minimalDigraph [node] []
 
 testPort :: String -> PortData
 testPort name = PortData {wireId = 0, portId = name, portLabel = name}
@@ -126,5 +134,6 @@ testNode = fancyNode node where
         fancyNodeId = "nid",
         fancyNodeName = "testName",
         fancyNodeInPorts = [testPort "a", testPort "b", testPort "c"],
-        fancyNodeOutPorts = [testPort "c", testPort "d"]
+        fancyNodeOutPorts = [testPort "c", testPort "d"],
+        fancyNodeShape = Ellipse
     }

@@ -3,7 +3,6 @@ module Examples(
   test8, test9, test10, test11, test12
 ) where
 import Control.Category.Cartesian
-import CustomCats
 import Graph
 import Control.Category((>>>))
 import qualified Control.Category as C
