@@ -18,6 +18,20 @@ packages:
       size: 1302
   original:
     hackage: vector-sized-1.5.0
+- completed:
+    hackage: graphviz-2999.20.1.0@sha256:023942db07ae923d654fb093614ab07ee0fb82eb4c7bc39daf26fd611cb7559b,7935
+    pantry-tree:
+      sha256: b4a85a4953b077816c3da4e37c35c3d33bcd99c5ea8996cb8aa740615a0ae98c
+      size: 4322
+  original:
+    hackage: graphviz-2999.20.1.0
+- completed:
+    hackage: text-2.0.2@sha256:71b5fa8c64d3c1fd0a08f993463220867b08290a2256e94b0952bf0e8f5a45cc,9905
+    pantry-tree:
+      sha256: 25f3b6dd211e30f9e0ef5047bb9f30df7a9296cf1043873e31558196dfe78676
+      size: 7514
+  original:
+    hackage: text-2.0.2
 snapshots:
 - completed:
     sha256: 5921ddc75f5dd3f197fbc32e1e5676895a8e7b971d4f82ef6b556657801dd18a

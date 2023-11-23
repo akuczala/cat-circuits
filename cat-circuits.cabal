@@ -30,6 +30,7 @@ library
       CustomCats
       Examples
       Graph
+      GraphVizUtils
       ParseGraph
       Utils
       VecCat
@@ -43,7 +44,9 @@ library
   build-depends:
       base >=4.7 && <5
     , catalyst
+    , graphviz
     , mtl
+    , text
     , vector-sized
   default-language: Haskell2010
 
@@ -60,7 +63,9 @@ executable cat-circuits-exe
       base >=4.7 && <5
     , cat-circuits
     , catalyst
+    , graphviz
     , mtl
+    , text
     , vector-sized
   default-language: Haskell2010
 
@@ -79,6 +84,8 @@ test-suite cat-circuits-test
     , base >=4.7 && <5
     , cat-circuits
     , catalyst
+    , graphviz
     , mtl
+    , text
     , vector-sized
   default-language: Haskell2010

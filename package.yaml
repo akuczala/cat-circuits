@@ -24,6 +24,8 @@ dependencies:
 - catalyst
 - mtl
 - vector-sized
+- graphviz
+- text
 
 ghc-options:
 - -Wall

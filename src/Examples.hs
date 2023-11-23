@@ -10,6 +10,7 @@ import Control.Category.Monoidal
 import Circuits
 import BoolCat (BoolCat(xorC))
 import VecCat (VecCat(toPair, fromPair, splitHead))
+import Utils
 
 test8 :: Graph () ()
 test8 = copy
@@ -32,9 +33,26 @@ test11 :: Graph () ()
 test11 = initialNode "c_x_y"
   >>> splitHead
   >>> C.id *** toPair
-  >>> fullAdder halfAdder
+  >>> labeledFullAdder (fullAdder (genNode "HADD"))
   >>> fromPair
   >>> terminalNode "s_c"
+
+labeledFullAdder
+  :: Graph (Bool, Pair Bool) (Pair Bool)
+  -> Graph (Bool, Pair Bool) (Pair Bool)
+labeledFullAdder fullAdd =
+  genNode "cin" *** (genNode "x" *** genNode "y")
+  >>> fullAdd
+  >>> (genNode "s" *** genNode "cout") 
+
+test12 :: Graph () ()
+test12 =
+  copy
+  >>> initialNode "cin" *** pairInput "x" "y"
+  >>> twoBitAdder (labeledFullAdder $ genNode "FADD")
+  >>> terminalNode "cout" *** terminalNode "s"
+  >>> consume
+
 
 exampleOut :: [Node]
 exampleOut = snd C.. snd $ runGraph test11 UnitP
