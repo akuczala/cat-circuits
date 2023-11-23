@@ -3,8 +3,6 @@ module BoolCat(
 ) where
 import Control.Category.Cartesian
 import Graph
-import Control.Category ((>>>))
-import Control.Category.Monoidal ((***), MonoidalProduct (..))
 
 class Cartesian k => BoolCat k where
   notC :: k Bool Bool

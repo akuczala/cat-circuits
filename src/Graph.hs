@@ -1,6 +1,6 @@
 -- Much adapted from Conal Elliot's Compiling Categories paper
 -- http://conal.net/papers/compiling-to-categories/
--- extended support to Christ Penner's catalyst typeclasses
+-- extended support to Chris Penner's catalyst typeclasses
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
