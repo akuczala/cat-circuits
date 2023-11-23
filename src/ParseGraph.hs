@@ -22,7 +22,7 @@ data PortData = PortData {
     wireId :: Port
     } deriving Show
 
-data NodeLabel = NotLabel | OrLabel | AndLabel | XorLabel | StringLabel String
+data NodeLabel = NotLabel | OrLabel | AndLabel | XorLabel | HADDLabel | FADDLabel | StringLabel String
     deriving Show
 
 nodeLabelFromString :: String -> NodeLabel
@@ -31,6 +31,8 @@ nodeLabelFromString s = case s of
     "or" -> OrLabel
     "and" -> AndLabel
     "xor" -> XorLabel
+    "FADD" -> FADDLabel
+    "HADD" -> HADDLabel
     _ -> StringLabel s
 
 nodeLabelToString :: NodeLabel -> String
@@ -39,6 +41,8 @@ nodeLabelToString l = case l of
     OrLabel -> "or"
     AndLabel -> "and"
     XorLabel -> "xor"
+    FADDLabel -> "FADD"
+    HADDLabel -> "HADD"
     StringLabel s -> s
 
 
@@ -63,22 +67,22 @@ getInPortId i = "in" ++ show i
 getOutPortId :: Int -> String
 getOutPortId i = "out" ++ show i
 
-nodeLabelToInPortNames :: NodeLabel -> [String]
-nodeLabelToInPortNames l = case l of
-    NotLabel -> [" "]
-    OrLabel -> ["x", "y"]
-    AndLabel -> ["x", "y"]
-    XorLabel -> ["x", "y"]
-    StringLabel _ -> map (\x -> "in" ++ show x) [0..]
+nodeLabelToInPortNames :: NodeLabel -> Int -> [String] -- int is len of ports
+nodeLabelToInPortNames l n = case l of
+    FADDLabel -> ["cin", "x", "y"]
+    _ -> case n of
+        1 -> [" "]
+        2 -> ["x", "y"]
+        _ -> map (\x -> "in" ++ show x) [0..]
 
 
-nodeLabelToOutPortNames :: NodeLabel -> [String]
-nodeLabelToOutPortNames l = case l of
-    NotLabel -> [" "]
-    OrLabel -> [" "]
-    AndLabel -> [" "]
-    XorLabel -> [" "]
-    StringLabel _ -> map (\x -> "out" ++ show x) [0..]
+nodeLabelToOutPortNames :: NodeLabel -> Int -> [String]
+nodeLabelToOutPortNames l i = case l of
+    HADDLabel -> ["s", "cout"]
+    FADDLabel -> ["s", "cout"]
+    _ -> case i of
+        1 -> [" "]
+        _ -> map (\x -> "out" ++ show x) [0..]
 
 labelInPorts :: [String] -> [Port] -> [PortData]
 labelInPorts = zipWith3 go [0..] where
@@ -100,13 +104,13 @@ parseNode :: Int -> Node -> NodeData
 parseNode i (Node name pIn pOut) = NodeData {
     nodeId = i,
     nodeLabel = label,
-    inPorts = inPorts,
-    outPorts = outPorts
+    inPorts = labelInPorts (nodeLabelToInPortNames label $ length inPorts) inPorts,
+    outPorts = labelOutPorts (nodeLabelToOutPortNames label $ length outPorts) outPorts
     }
     where
         label = nodeLabelFromString name
-        inPorts = labelInPorts (nodeLabelToInPortNames label) (parsePorts pIn)
-        outPorts = labelOutPorts (nodeLabelToOutPortNames label) (parsePorts pOut)
+        inPorts =  parsePorts pIn
+        outPorts = parsePorts pOut
 
 allPorts :: [NodeData] -> [Port]
 allPorts nodes = nub $ concatMap (map wireId . inPorts) nodes

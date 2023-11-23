@@ -92,12 +92,16 @@ fancyNode nodeData = DotNode {
     ]
 }
 
--- TODO: include port information
+nodePortString :: NodePortData -> String
+nodePortString npd = nid ++ ":" ++ pid where
+    nid = nodeIdToString . nodeId . nodePortNode $ npd
+    pid = nodePortId npd
+
 portNodesToEdge :: PortNodes -> [DotEdge String]
-portNodesToEdge pns = map (makeEdge . nodePortNode) (toNodePorts pns) where
-    makeEdge n = DotEdge fnid (nodeIdToString $ nodeId n) []
+portNodesToEdge pns = map makeEdge (toNodePorts pns) where
+    makeEdge n = DotEdge fnid (nodePortString n) []
     fnid = case fromNodePort pns of
-        OnlyOne fn -> nodeIdToString . nodeId . nodePortNode $ fn
+        OnlyOne fn -> nodePortString fn
         NothingYet -> "INVALID"
         TooMany -> "INVALID"
 
