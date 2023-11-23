@@ -8,7 +8,15 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DataKinds #-}
-module Graph where
+module Graph(
+  Port,
+  Node(..),
+  Graph(..),
+  genNode,
+  Ports(..),
+  runGraph,
+  initialNode, terminalNode, pairInput
+) where
 
 import Control.Monad.State
 import Control.Applicative (Applicative(liftA2))

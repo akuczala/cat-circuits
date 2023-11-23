@@ -1,5 +1,6 @@
 module Examples(
-  exampleOut
+  exampleOut,
+  test8, test9, test10, test11, test12
 ) where
 import Control.Category.Cartesian
 import CustomCats
@@ -54,5 +55,5 @@ test12 =
   >>> consume
 
 
-exampleOut :: [Node]
-exampleOut = snd C.. snd $ runGraph test11 UnitP
+exampleOut :: Graph () () -> [Node]
+exampleOut graph = snd C.. snd $ runGraph graph UnitP

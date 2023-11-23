@@ -1,14 +1,47 @@
 {-# LANGUAGE GADTs #-}
-module ParseGraph (translateGraph, serializeGraph) where
+module ParseGraph (
+    translateGraph,
+    serializeGraph,
+    PortData(..),
+    NodeData(..),
+    nodeIdToString,
+    nodeLabelToString,
+    findPortNodes,
+    PortNodes(..)
+    ) where
 import Data.List (nub, intercalate)
 import Graph
 import Utils
 
+data PortData = PortData {
+    portId :: String,
+    portLabel :: String,
+    wireId :: Port
+    } deriving Show
+
+data NodeLabel = NotLabel | OrLabel | AndLabel | StringLabel String
+    deriving Show
+
+nodeLabelFromString :: String -> NodeLabel
+nodeLabelFromString s = case s of
+    "not" -> NotLabel
+    "or" -> OrLabel
+    "and" -> AndLabel
+    _ -> StringLabel s
+
+nodeLabelToString :: NodeLabel -> String
+nodeLabelToString l = case l of
+    NotLabel -> "not"
+    OrLabel -> "or"
+    AndLabel -> "and"
+    StringLabel s -> s
+
+
 data NodeData = NodeData {
     nodeId :: Int,
-    nodeLabel :: String,
-    inPorts :: [Port],
-    outPorts :: [Port]
+    nodeLabel :: NodeLabel,
+    inPorts :: [PortData],
+    outPorts :: [PortData]
     }
     deriving Show
 
@@ -19,16 +52,57 @@ parsePorts (IntP p) = [p]
 parsePorts (PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
 parsePorts (VecP v) = concatMap parsePorts v
 
+getInPortId :: Int -> String
+getInPortId i = "in" ++ show i
+
+getOutPortId :: Int -> String
+getOutPortId i = "out" ++ show i
+
+nodeLabelToInPortNames :: NodeLabel -> [String]
+nodeLabelToInPortNames l = case l of
+    NotLabel -> [" "]
+    OrLabel -> ["x", "y"]
+    AndLabel -> ["x", "y"]
+    StringLabel _ -> map (\x -> "in" ++ show x) [0..]
+
+
+nodeLabelToOutPortNames :: NodeLabel -> [String]
+nodeLabelToOutPortNames l = case l of
+    NotLabel -> [" "]
+    OrLabel -> [" "]
+    AndLabel -> [" "]
+    StringLabel _ -> map (\x -> "out" ++ show x) [0..]
+
+labelInPorts :: [String] -> [Port] -> [PortData]
+labelInPorts = zipWith3 go [0..] where
+    go i name p = PortData {
+        wireId = p,
+        portId = getInPortId i,
+        portLabel = name
+        }
+
+labelOutPorts :: [String] -> [Port] -> [PortData]
+labelOutPorts = zipWith3 go [0..] where
+    go i name p = PortData {
+        wireId = p,
+        portId = getOutPortId i,
+        portLabel = name
+        }
+
 parseNode :: Int -> Node -> NodeData
 parseNode i (Node name pIn pOut) = NodeData {
     nodeId = i,
-    nodeLabel = name,
-    inPorts = parsePorts pIn,
-    outPorts = parsePorts pOut
+    nodeLabel = label,
+    inPorts = inPorts,
+    outPorts = outPorts
     }
+    where
+        label = nodeLabelFromString name
+        inPorts = labelInPorts (nodeLabelToInPortNames label) (parsePorts pIn)
+        outPorts = labelOutPorts (nodeLabelToOutPortNames label) (parsePorts pOut)
 
 allPorts :: [NodeData] -> [Port]
-allPorts nodes = nub $ concatMap inPorts nodes
+allPorts nodes = nub $ concatMap (map wireId . inPorts) nodes
 
 
 data PortNodes = PortNodes {fromNode :: OnlyOne NodeData, toNodes :: [NodeData]}
@@ -39,15 +113,16 @@ findPortNodes :: Port -> [NodeData] -> PortNodes
 findPortNodes port = foldl go PortNodes {fromNode=NothingYet, toNodes=[]} where
     go :: PortNodes -> NodeData -> PortNodes
     go pNodes node@(NodeData _ _ inPorts outPorts) = case (outPorts, inPorts) of
-        _ | port `elem` outPorts -> pNodes{fromNode = addAnother node (fromNode pNodes)}
-        _ | port `elem` inPorts -> pNodes {toNodes = node : toNodes pNodes}
+        _ | port `elem` map wireId outPorts -> pNodes{fromNode = addAnother node (fromNode pNodes)}
+        _ | port `elem` map wireId inPorts -> pNodes {toNodes = node : toNodes pNodes}
         _ -> pNodes
 
-nodeLabelToShape :: String -> String
-nodeLabelToShape "not" = "invtriangle"
-nodeLabelToShape "or" = "invhouse"
-nodeLabelToShape "and" = "invtrapezium"
+nodeLabelToShape :: NodeLabel -> String
+nodeLabelToShape NotLabel= "invtriangle"
+nodeLabelToShape OrLabel = "invhouse"
+nodeLabelToShape AndLabel = "invtrapezium"
 nodeLabelToShape _ = "ellipse"
+
 
 nodeIdToString :: Int -> String
 nodeIdToString i = "n" ++ show i
@@ -55,7 +130,7 @@ nodeIdToString i = "n" ++ show i
 nodeString :: NodeData -> String
 nodeString node = idStr ++ " [label=" ++ label ++ ", shape=" ++ shape ++ "]" where
     idStr = (nodeIdToString . nodeId) node
-    label = nodeLabel node
+    label = nodeLabelToString $ nodeLabel node
     shape = nodeLabelToShape (nodeLabel node)
 
 serializePortNodes :: PortNodes -> String

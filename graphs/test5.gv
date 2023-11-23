@@ -1,0 +1,54 @@
+digraph {
+    n0 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">in0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">cout</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n1 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">in0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">s</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n2 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">x</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">y</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">or</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1"> </TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n3 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">x</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">y</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">and</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1"> </TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n4 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">in0</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">in1</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">xor</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1">out0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n5 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">x</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">y</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">and</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1"> </TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n6 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">in0</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">in1</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">xor</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1">out0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n7 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">y</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1">out0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n8 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">x</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1">out0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n9 [shape=plaintext
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+                                                                                <TR><TD BORDER="1" CELLPADDING="4">cin</TD></TR>
+                                                                                <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1">out0</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+    n2 -> n0;
+    n3 -> n1;
+    n5 -> n2;
+    n4 -> n2;
+    n9 -> n4;
+    n9 -> n3;
+    n6 -> n4;
+    n6 -> n3;
+    n8 -> n6;
+    n8 -> n5;
+    n7 -> n6;
+    n7 -> n5;
+}
