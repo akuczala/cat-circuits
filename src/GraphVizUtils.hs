@@ -1,13 +1,15 @@
 module GraphVizUtils(
     testGraph,
-    testNode
+    testNode,
+    serializeDotGraph
 ) where
 --import Data.GraphViz.Attributes.HTML (Table (..), Attribute (..), Cell (LabelCell), Label (..), TextItem (..), Row(..))
 import Data.GraphViz.Attributes.HTML
-import Data.Text.Lazy(pack)
+import Data.Text.Lazy(pack, unpack)
 import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape), Label (HtmlLabel), Shape (PlainText))
 import Data.List (intersperse)
-import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..))
+import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..), PrintDot (toDot), DotEdge)
+import Data.GraphViz.Printing (renderDot)
 
 
 toTextLabel :: String -> Data.GraphViz.Attributes.HTML.Label
@@ -15,6 +17,18 @@ toTextLabel s = Text [Str $ pack s]
 
 emptyCell :: Cell
 emptyCell = LabelCell [Width 20] (toTextLabel "")
+
+minimalTable :: [Row] -> Table
+minimalTable rows = HTable {
+        tableFontAttrs = Nothing,
+        tableAttrs = [
+        Border 0,
+        CellBorder 0,
+        CellSpacing 0,
+        CellPadding 0
+    ],
+    tableRows = rows
+    }
 
 data PortData = PortData {portId :: String, portLabel :: String} deriving Show
 
@@ -28,16 +42,7 @@ portCell portData = LabelCell attrs (toTextLabel $ portLabel portData) where
 
 portsRow :: [PortData] -> Row
 portsRow ports = Cells [LabelCell [] (Table innerTable)] where
-    innerTable = HTable {
-        tableFontAttrs = Nothing,
-        tableAttrs = [
-        Border 0,
-        CellBorder 0,
-        CellSpacing 0,
-        CellPadding 0
-    ],
-    tableRows = [cells]
-    }
+    innerTable = minimalTable [cells]
     cells = Cells $ [emptyCell] ++ intersperse emptyCell (map portCell ports) ++ [emptyCell]
 
 nodeRow :: String -> Row
@@ -48,20 +53,12 @@ data FancyNodeData = FancyNodeData {fancyNodeName :: String, fancyNodeInPorts ::
     deriving Show
 
 fancyNodeTable :: FancyNodeData -> Table
-fancyNodeTable nodeData = HTable {
-    tableFontAttrs = Nothing,
-    tableAttrs = [
-        Border 0,
-        CellBorder 0,
-        CellSpacing 0,
-        CellPadding 0
-    ],
-    tableRows = [
+fancyNodeTable nodeData = minimalTable rows where
+    rows = [
         portsRow (fancyNodeInPorts nodeData),
         nodeRow (fancyNodeName nodeData),
         portsRow (fancyNodeOutPorts nodeData)
         ]
- }
 
 fancyNode :: String -> FancyNodeData -> DotNode String
 fancyNode nodeId nodeData = DotNode {
@@ -72,18 +69,24 @@ fancyNode nodeId nodeData = DotNode {
     ]
 }
 
-testGraph :: DotNode n ->  DotGraph n
-testGraph node = DotGraph {
+minimalDigraph :: [DotNode n] -> [DotEdge n] -> DotGraph n
+minimalDigraph nodes edges = DotGraph {
     strictGraph = False,
     directedGraph = True,
     graphID = Nothing,
     graphStatements = DotStmts {
         attrStmts = [],
         subGraphs = [],
-        nodeStmts = [node],
-        edgeStmts = []
+        nodeStmts = nodes,
+        edgeStmts = edges
     }
 }
+
+testGraph :: DotNode n ->  DotGraph n
+testGraph node = minimalDigraph [node] []
+
+serializeDotGraph :: (PrintDot n) => DotGraph n -> String
+serializeDotGraph g = unpack $ renderDot $ toDot g
 
 testPort :: String -> PortData
 testPort name = PortData {portId = name, portLabel = name}
