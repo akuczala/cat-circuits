@@ -13,8 +13,10 @@ module Graph(
   Node(..),
   Graph(..),
   genNode,
+  GenPorts,
   Ports(..),
   runGraph,
+  GraphM,
   initialNode, terminalNode, pairInput
 ) where
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Examples(
   writeDotExample,
   examples
@@ -12,6 +13,8 @@ import BoolCat (BoolCat(xorC))
 import ParseGraph (translateGraph)
 import GraphVizUtils (buildDotGraph, serializeDotGraph)
 import Data.Function ((&))
+import VecCat (VecCat(..))
+import qualified Data.Vector.Sized as V
 
 examples :: [Graph () ()]
 examples = [
@@ -46,8 +49,22 @@ examples = [
   >>> initialNode "cin" *** pairInput "x" "y"
   >>> twoBitAdder (fullAdder halfAdder)
   >>> terminalNode "s" *** terminalNode "cout"
-  >>> consume
+  >>> consume,
+
+  copy
+  >>> inVec4 "x" *** inVec4 "y"
+  >>> zipVecs
+  >>> mapVec xorC
+  >>> genNode "out",
+  
+  copy
+  >>> initialNode "y" *** inVec4 "x"
+  >>> foldlVec xorC
+  >>> genNode "out"
   ]
+ 
+inVec4 :: (GenPorts a) => String -> Graph () (V.Vector 4 a)
+inVec4= genNode
 
 exampleOut :: Graph () () -> [Node]
 exampleOut graph = snd C.. snd $ runGraph graph UnitP
