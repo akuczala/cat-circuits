@@ -1,7 +1,6 @@
 {-# LANGUAGE GADTs #-}
 module ParseGraph (
     translateGraph,
-    serializeGraph,
     PortData(..),
     NodeData(..),
     NodePortData(..),
@@ -11,7 +10,7 @@ module ParseGraph (
     PortNodes(..),
     NodeLabel(..)
     ) where
-import Data.List (nub, intercalate)
+import Data.List (nub)
 import Graph
 import Utils
 import Data.Maybe (mapMaybe)
@@ -154,28 +153,7 @@ nodeLabelToShape _ = "ellipse"
 nodeIdToString :: Int -> String
 nodeIdToString i = "n" ++ show i
 
-nodeString :: NodeData -> String
-nodeString node = idStr ++ " [label=" ++ label ++ ", shape=" ++ shape ++ "]" where
-    idStr = (nodeIdToString . nodeId) node
-    label = nodeLabelToString $ nodeLabel node
-    shape = nodeLabelToShape (nodeLabel node)
-
-serializePortNodes :: PortNodes -> String
-serializePortNodes pNodes = serializedInNodes ++ " -> " ++ serializedOutNodes where
-    serializedInNodes = case fromNodePort pNodes of
-        OnlyOne nodePort -> nodeIdToString (nodeId . nodePortNode $ nodePort)
-        NothingYet -> "INVALID: Must have single origin node but got 0"
-        TooMany -> "INVALID: Must have single origin node but got > 1"
-    serializedOutNodes = "{" ++ intercalate "," (map (nodeIdToString . nodeId . nodePortNode) (toNodePorts pNodes)) ++ "}"
-
 translateGraph :: [Node] -> ([NodeData], [Port])
 translateGraph inNodes = (nodes, ports) where
     nodes = zipWith parseNode [0..] inNodes
     ports = allPorts nodes
-
-serializeGraph :: [Node] -> [String]
-serializeGraph inNodes = nodeStrings ++ edgeStrings
-    where
-        (nodes, ports) = translateGraph inNodes
-        nodeStrings = map nodeString nodes
-        edgeStrings = map (serializePortNodes . flip findPortNodes nodes) ports

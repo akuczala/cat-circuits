@@ -1,10 +1,8 @@
 module GraphVizUtils(
-    testGraph,
-    testNode,
     serializeDotGraph,
     buildDotGraph
 ) where
---import Data.GraphViz.Attributes.HTML (Table (..), Attribute (..), Cell (LabelCell), Label (..), TextItem (..), Row(..))
+
 import Data.GraphViz.Attributes.HTML
 import Data.Text.Lazy(pack, unpack)
 import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape, HeadPort, TailPort), Label (HtmlLabel), Shape (..), PortPos (..))
@@ -12,7 +10,7 @@ import Data.List (intersperse)
 import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..), PrintDot (toDot), DotEdge (DotEdge))
 import Data.GraphViz.Printing (renderDot)
 
-import ParseGraph(PortData(..), NodeData(..), nodeIdToString, nodeLabelToString, PortNodes(..), findPortNodes, NodeLabel(..), NodePortData(..))
+import ParseGraph
 import Utils (OnlyOne(..))
 import Graph (Port)
 
@@ -125,19 +123,3 @@ buildDotGraph nodeDatas ports = minimalDigraph nodes edges where
 
 serializeDotGraph :: (PrintDot n) => DotGraph n -> String
 serializeDotGraph g = unpack $ renderDot $ toDot g
-
-testGraph :: DotNode n ->  DotGraph n
-testGraph node = minimalDigraph [node] []
-
-testPort :: String -> PortData
-testPort name = PortData {wireId = 0, portId = name, portLabel = name}
-
-testNode :: DotNode String
-testNode = fancyNode node where
-    node = FancyNodeData {
-        fancyNodeId = "nid",
-        fancyNodeName = "testName",
-        fancyNodeInPorts = [testPort "a", testPort "b", testPort "c"],
-        fancyNodeOutPorts = [testPort "c", testPort "d"],
-        fancyNodeShape = Ellipse
-    }

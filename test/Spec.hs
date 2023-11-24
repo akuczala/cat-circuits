@@ -1,6 +1,6 @@
 import qualified System.Exit as Exit
 import Test.HUnit
-import Examples (halfAdder)
+import Circuits (halfAdder)
 
 
 testHalfAdder :: Test
