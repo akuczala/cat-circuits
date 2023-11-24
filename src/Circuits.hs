@@ -26,7 +26,7 @@ fullAdder
 fullAdder halfAdd =
   C.id *** halfAdd
   >>> reassoc
-  >>> halfAdd *** C.id
+  >>> (halfAdd >>> swap) *** C.id
   >>> swap >>> reassoc >>> swap
   >>> C.id *** orC
 

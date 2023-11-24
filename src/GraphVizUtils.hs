@@ -7,7 +7,7 @@ module GraphVizUtils(
 --import Data.GraphViz.Attributes.HTML (Table (..), Attribute (..), Cell (LabelCell), Label (..), TextItem (..), Row(..))
 import Data.GraphViz.Attributes.HTML
 import Data.Text.Lazy(pack, unpack)
-import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape), Label (HtmlLabel), Shape (..))
+import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape, HeadPort, TailPort), Label (HtmlLabel), Shape (..), PortPos (..))
 import Data.List (intersperse)
 import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..), PrintDot (toDot), DotEdge (DotEdge))
 import Data.GraphViz.Printing (renderDot)
@@ -92,18 +92,18 @@ fancyNode nodeData = DotNode {
     ]
 }
 
-nodePortString :: NodePortData -> String
-nodePortString npd = nid ++ ":" ++ pid where
-    nid = nodeIdToString . nodeId . nodePortNode $ npd
-    pid = nodePortId npd
+nodeString :: NodePortData -> String
+nodeString = nodeIdToString . nodeId . nodePortNode
 
 portNodesToEdge :: PortNodes -> [DotEdge String]
 portNodesToEdge pns = map makeEdge (toNodePorts pns) where
-    makeEdge n = DotEdge fnid (nodePortString n) []
-    fnid = case fromNodePort pns of
-        OnlyOne fn -> nodePortString fn
-        NothingYet -> "INVALID"
-        TooMany -> "INVALID"
+    makeEdge tNode = DotEdge (nodeString fNode) (nodeString tNode) [headPort tNode, tailPort fNode]
+    fNode = case fromNodePort pns of
+        OnlyOne fn -> fn
+        NothingYet -> error "INVALID"
+        TooMany -> error "INVALID"
+    headPort n = HeadPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
+    tailPort n = TailPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
 
 minimalDigraph :: [DotNode n] -> [DotEdge n] -> DotGraph n
 minimalDigraph nodes edges = DotGraph {
