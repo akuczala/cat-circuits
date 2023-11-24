@@ -1,6 +1,6 @@
 module Examples(
   exampleOut,
-  test8, test9, test10, test11, test12
+  test8, test9, test10, test11, test12, test13
 ) where
 import Control.Category.Cartesian
 import Graph
@@ -10,7 +10,6 @@ import Control.Category.Monoidal
 import Circuits
 import BoolCat (BoolCat(xorC))
 import VecCat (VecCat(toPair, fromPair, splitHead))
-import Utils
 
 test8 :: Graph () ()
 test8 = copy
@@ -33,24 +32,24 @@ test11 :: Graph () ()
 test11 = initialNode "c_x_y"
   >>> splitHead
   >>> C.id *** toPair
-  >>> labeledFullAdder (fullAdder (genNode "HADD"))
+  >>> fullAdder (genNode "HADD")
   >>> fromPair
   >>> terminalNode "s_c"
-
-labeledFullAdder
-  :: Graph (Bool, Pair Bool) (Pair Bool)
-  -> Graph (Bool, Pair Bool) (Pair Bool)
-labeledFullAdder fullAdd =
-  genNode "cin" *** (genNode "x" *** genNode "y")
-  >>> fullAdd
-  >>> (genNode "s" *** genNode "cout") 
 
 test12 :: Graph () ()
 test12 =
   copy
   >>> initialNode "cin" *** pairInput "x" "y"
-  >>> twoBitAdder (labeledFullAdder $ genNode "FADD")
-  >>> terminalNode "cout" *** terminalNode "s"
+  >>> twoBitAdder (genNode "FADD")
+  >>> terminalNode "s" *** terminalNode "cout"
+  >>> consume
+
+test13 :: Graph () ()
+test13 =
+  copy
+  >>> initialNode "cin" *** pairInput "x" "y"
+  >>> twoBitAdder (fullAdder halfAdder)
+  >>> terminalNode "s" *** terminalNode "cout"
   >>> consume
 
 
