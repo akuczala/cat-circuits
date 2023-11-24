@@ -1,6 +1,0 @@
-digraph {
-    test [shape=plaintext
-         ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="a" BORDER="1" CELLPADDING="1">a</TD> <TD WIDTH="20"></TD> <TD PORT="b" BORDER="1" CELLPADDING="1">b</TD> <TD WIDTH="20"></TD> <TD PORT="c" BORDER="1" CELLPADDING="1">c</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
-                                                                                  <TR><TD BORDER="1" CELLPADDING="4">testName</TD></TR>
-                                                                                  <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="c" BORDER="1" CELLPADDING="1">c</TD> <TD WIDTH="20"></TD> <TD PORT="d" BORDER="1" CELLPADDING="1">d</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
-}
