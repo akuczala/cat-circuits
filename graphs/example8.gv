@@ -1,6 +1,6 @@
 digraph {
     n0 [shape=plaintext
-       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1"> </TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
+       ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="in0" BORDER="1" CELLPADDING="1">in0</TD> <TD WIDTH="20"></TD> <TD PORT="in1" BORDER="1" CELLPADDING="1">in1</TD> <TD WIDTH="20"></TD> <TD PORT="in2" BORDER="1" CELLPADDING="1">in2</TD> <TD WIDTH="20"></TD> <TD PORT="in3" BORDER="1" CELLPADDING="1">in3</TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
                                                                                 <TR><TD BORDER="1" CELLPADDING="4" STYLE="ROUNDED">out</TD></TR>
                                                                                 <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
     n1 [shape=plaintext
@@ -27,18 +27,24 @@ digraph {
        ,label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR>
                                                                                 <TR><TD BORDER="1" CELLPADDING="4" STYLE="ROUNDED">x</TD></TR>
                                                                                 <TR><TD><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD> <TD PORT="out0" BORDER="1" CELLPADDING="1"> </TD> <TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
-    n1 -> n0 [headport=in0
+    n4 -> n3 [headport=in0
+             ,tailport=out0];
+    n4 -> n0 [headport=in0
+             ,tailport=out0];
+    n3 -> n2 [headport=in0
+             ,tailport=out0];
+    n3 -> n0 [headport=in1
              ,tailport=out0];
     n2 -> n1 [headport=in0
              ,tailport=out0];
+    n2 -> n0 [headport=in2
+             ,tailport=out0];
+    n1 -> n0 [headport=in3
+             ,tailport=out0];
     n5 -> n1 [headport=in1
              ,tailport=out3];
-    n3 -> n2 [headport=in0
-             ,tailport=out0];
     n5 -> n2 [headport=in1
              ,tailport=out2];
-    n4 -> n3 [headport=in0
-             ,tailport=out0];
     n5 -> n3 [headport=in1
              ,tailport=out1];
     n6 -> n4 [headport=in0

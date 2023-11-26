@@ -58,8 +58,13 @@ examples = [
   >>> genNode "out",
   
   copy
-  >>> initialNode "y" *** inVec4 "x"
+  >>> initialNode "x" *** inVec4 "y"
   >>> foldlVec xorC
+  >>> genNode "out",
+
+  copy
+  >>> initialNode "x" *** inVec4 "y"
+  >>> postScanlVec xorC
   >>> genNode "out"
   ]
  
