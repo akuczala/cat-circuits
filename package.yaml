@@ -26,6 +26,7 @@ dependencies:
 - vector-sized
 - graphviz
 - text
+- ghc-typelits-natnormalise
 
 ghc-options:
 - -Wall

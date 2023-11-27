@@ -105,24 +105,25 @@ testTwoBitAdder = testTrue $ funEqTable testFun table where
 
 testNBitAdder :: (KnownNat n) => Proxy n -> Test
 testNBitAdder proxN = testTrue $ funEqTable testFun table where
-    testFun :: (Bool, (Int, Int)) -> Int
+    testFun :: (Bool, (Int, Int)) -> (Int, Bool)
     testFun =
         second' (intToBoolVecLilEnd *** intToBoolVecLilEnd)
         >>> adder proxN
-        >>> boolVecToIntLilEnd
-    adder :: Proxy n -> (Bool, (V.Vector n Bool, V.Vector n Bool)) -> V.Vector n Bool
+        >>> first' boolVecToIntLilEnd
+    adder :: Proxy n -> (Bool, (V.Vector n Bool, V.Vector n Bool)) -> (V.Vector n Bool, Bool)
     adder _ = nBitAdder (fullAdder halfAdder)
-    intN :: Int
-    intN = (fromIntegral . toInteger . natVal) proxN
-    powIntN = 2 ^ intN
+    nBits :: Int
+    nBits = (fromIntegral . toInteger . natVal) proxN
+    nStates = 2 ^ nBits
     table = [
         (
             (cin, (x, y)),
             (
-                mod (x + y + fromEnum cin) powIntN
+                mod (x + y + fromEnum cin) nStates,
+                (x + y + fromEnum cin) `div` nStates == 1
             )
         )
-            | cin <- [False, True], x <- [0 .. powIntN - 1], y <- [0 .. powIntN - 1]
+            | cin <- [False, True], x <- [0 .. nStates - 1], y <- [0 .. nStates - 1]
         ]
 
 tests :: Test

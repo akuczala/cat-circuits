@@ -17,6 +17,8 @@ module Graph(
   Ports(..),
   runGraph,
   GraphM,
+  InitialNode,
+  TerminalNode,
   initialNode, terminalNode, pairInput
 ) where
 
@@ -130,13 +132,13 @@ genNode name = Graph (
     return b
   )
 
-forkNode :: (GenPorts a) => Graph a (a, a)
-forkNode = genNode "fork"
+type InitialNode a = Graph () a
+type TerminalNode a = Graph a ()
 
-terminalNode :: String -> Graph a ()
+terminalNode :: String -> TerminalNode a
 terminalNode = genNode
 
-initialNode :: (GenPorts b) => String -> Graph () b
+initialNode :: (GenPorts b) => String -> InitialNode b
 initialNode = genNode
 
 pairInput :: (GenPorts a, GenPorts b) => String -> String -> Graph () (a, b)

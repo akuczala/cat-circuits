@@ -55,6 +55,7 @@ fullAdder halfAdd =
   >>> swap >>> reassoc >>> swap
   >>> second' orC
 
+-- implementation "by hand" gets real clunky fast
 twoBitAdder
   :: (BoolCat k, VecCat k)
   => k (Bool, Pair Bool) (Pair Bool)
@@ -68,11 +69,11 @@ twoBitAdder fullAdd =
   >>> reassoc
   >>> first' fromPair
 
--- TODO: include carry out
+-- (cin, (x, y)) `k` (sum, cout)
 nBitAdder
   :: (BoolCat k, VecCat k)
   => k (Bool, Pair Bool) (Pair Bool)
-  -> k (Bool, (V.Vector n Bool, V.Vector n Bool)) (V.Vector n Bool)
+  -> k (Bool, (V.Vector n Bool, V.Vector n Bool)) (V.Vector n Bool, Bool)
 nBitAdder fullAdd
   = second' zipVecs
   >>> splitScanVec (fullAdd >>> swap)

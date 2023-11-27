@@ -52,30 +52,27 @@ examples = [
   >>> consume,
 
   copy
-  >>> inVec4 "x" *** inVec4 "y"
+  >>> initialNode "x" *** initialNode "y"
   >>> zipVecs
   >>> mapVec xorC
-  >>> genNode "out",
+  >>> (genNode "out" :: TerminalNode (V.Vector 4 Bool)),
   
   copy
-  >>> initialNode "x" *** inVec4 "y"
+  >>> initialNode "x" *** (initialNode "y" :: InitialNode (V.Vector 4 Bool))
   >>> foldlVec xorC
   >>> genNode "out",
 
   copy
-  >>> initialNode "x" *** inVec4 "y"
+  >>> initialNode "x" *** initialNode "y"
   >>> postScanlVec xorC
-  >>> genNode "out",
+  >>> (terminalNode "out"  :: TerminalNode (V.Vector 4 Bool)),
 
   copy
-  >>> initialNode "c" *** (copy >>> (inVec4 "x" *** inVec4 "y"))
+  >>> initialNode "cin" *** (copy >>> (genNode "x" *** genNode "y"))
   >>> nBitAdder (genNode "FADD")
-  >>> genNode "out"
+  >>> (terminalNode "sum" :: TerminalNode (V.Vector 4 Bool)) *** terminalNode "cout"
+  >>> consume
   ]
- 
-
-inVec4 :: (GenPorts a) => String -> Graph () (V.Vector 4 a)
-inVec4= genNode
 
 exampleOut :: Graph () () -> [Node]
 exampleOut graph = snd C.. snd $ runGraph graph UnitP

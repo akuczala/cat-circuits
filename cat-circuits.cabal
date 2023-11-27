@@ -44,6 +44,7 @@ library
   build-depends:
       base >=4.7 && <5
     , catalyst
+    , ghc-typelits-natnormalise
     , graphviz
     , mtl
     , text
@@ -63,6 +64,7 @@ executable cat-circuits-exe
       base >=4.7 && <5
     , cat-circuits
     , catalyst
+    , ghc-typelits-natnormalise
     , graphviz
     , mtl
     , text
@@ -84,6 +86,7 @@ test-suite cat-circuits-test
     , base >=4.7 && <5
     , cat-circuits
     , catalyst
+    , ghc-typelits-natnormalise
     , graphviz
     , mtl
     , text

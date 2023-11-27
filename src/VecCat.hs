@@ -2,19 +2,19 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module VecCat(
     VecCat(..)
 ) where
 
 import qualified Data.Vector.Sized as V
 import GHC.TypeNats
-import Control.Arrow (first)
 import Data.Bifunctor (bimap)
 import Graph
 import Control.Category (Category (..), (>>>))
 import Utils (postScanlVecM, splitScanlVecM)
 import Data.Maybe (fromJust)
-import Control.Arrow (Arrow(second))
+import Control.Arrow (Arrow(first, second))
 
 class Category k => VecCat k where
     splitHead :: V.Vector (1 + n) a `k` (a, V.Vector n a)
@@ -30,7 +30,7 @@ class Category k => VecCat k where
     foldlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` b
     postScanlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` V.Vector n b
     -- TODO: this should return (b, V.Vector n a) `k` (V.Vector n c, b)
-    splitScanVec :: (b, a) `k` (b, c) -> (b, V.Vector n a) `k` V.Vector n c
+    splitScanVec :: (b, a) `k` (b, c) -> (b, V.Vector n a) `k` (V.Vector n c, b)
 
 instance VecCat (->) where
     splitHead :: V.Vector (1 + n) a -> (a, V.Vector n a)
@@ -45,8 +45,9 @@ instance VecCat (->) where
     mapVec = V.map
     foldlVec f = uncurry $ foldl (curry f)
     postScanlVec f = uncurry $ V.postscanl (curry f)
-    splitScanVec f (b0, as) = fromJust Prelude.. snd <$> postScanlVec acc ((b0, Nothing), as) where
+    splitScanVec f (b0, as) = extract $ postScanlVec acc ((b0, Nothing), as) where
         acc ((b, _), a) = second Just $ f (b, a)
+        extract bcv = (fmap (fromJust Prelude.. snd) bcv, V.last (V.cons b0 (fmap fst bcv)))
     
 
 instance VecCat Graph where
@@ -70,8 +71,9 @@ instance VecCat Graph where
         go (b,a) = f (PairP b a)
     postScanlVec (Graph f) = Graph(\(PairP pb (VecP v)) -> VecP <$> postScanlVecM go pb v) where
         go b a = f (PairP b a)
-    splitScanVec (Graph f) = Graph(\(PairP b0 (VecP as)) -> VecP <$> splitScanlVecM go b0 as) where
+    splitScanVec (Graph f) = Graph(\(PairP b0 (VecP as)) -> extract <$> splitScanlVecM go b0 as) where
         go b a = do
             x <- f (PairP b a)
             return $ case x of
                 PairP y z -> (y, z)
+        extract (cs, b) = PairP (VecP cs) b

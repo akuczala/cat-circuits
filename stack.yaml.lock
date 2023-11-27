@@ -32,6 +32,13 @@ packages:
       size: 7514
   original:
     hackage: text-2.0.2
+- completed:
+    hackage: ghc-typelits-natnormalise-0.7.9@sha256:e1f86fe0d866a6f2783a77a133a81edfcb04556fae016efa663ba914632afe17,3788
+    pantry-tree:
+      sha256: f7212001a9dde1acdb154d570c8afa7b4d3b8ab096fc354059977c1a957ff8f9
+      size: 701
+  original:
+    hackage: ghc-typelits-natnormalise-0.7.9
 snapshots:
 - completed:
     sha256: 5921ddc75f5dd3f197fbc32e1e5676895a8e7b971d4f82ef6b556657801dd18a
