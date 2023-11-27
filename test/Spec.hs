@@ -1,9 +1,13 @@
+{-# LANGUAGE DataKinds #-}
 import qualified System.Exit as Exit
 import Test.HUnit
 import qualified Data.Vector.Sized as V
 import Circuits
 import Control.Category ((>>>))
 import Control.Category.Monoidal (MonoidalProduct(..))
+import GHC.TypeNats
+import Data.Data (Proxy (..))
+
 
 testTrue :: Bool -> Test
 testTrue result = TestCase (assertBool "fail" result)
@@ -99,6 +103,28 @@ testTwoBitAdder = testTrue $ funEqTable testFun table where
             | cin <- [False, True], x <- [0, 1, 2], y <- [0, 1, 2]
         ]
 
+testNBitAdder :: (KnownNat n) => Proxy n -> Test
+testNBitAdder proxN = testTrue $ funEqTable testFun table where
+    testFun :: (Bool, (Int, Int)) -> Int
+    testFun =
+        second' (intToBoolVecLilEnd *** intToBoolVecLilEnd)
+        >>> adder proxN
+        >>> boolVecToIntLilEnd
+    adder :: Proxy n -> (Bool, (V.Vector n Bool, V.Vector n Bool)) -> V.Vector n Bool
+    adder _ = nBitAdder (fullAdder halfAdder)
+    intN :: Int
+    intN = (fromIntegral . toInteger . natVal) proxN
+    powIntN = 2 ^ intN
+    table = [
+        (
+            (cin, (x, y)),
+            (
+                mod (x + y + fromEnum cin) powIntN
+            )
+        )
+            | cin <- [False, True], x <- [0 .. powIntN - 1], y <- [0 .. powIntN - 1]
+        ]
+
 tests :: Test
 tests = TestList [
     TestLabel "boolVecToIntBigEnd" testBoolVecToIntBigEnd,
@@ -107,7 +133,8 @@ tests = TestList [
     TestLabel "testIntToLilEnd" testIntToLilEnd,
     TestLabel "halfAdder" testHalfAdder,
     TestLabel "fullAdder" testFullAdder,
-    TestLabel "twoBitAdder" testTwoBitAdder
+    TestLabel "twoBitAdder" testTwoBitAdder,
+    TestLabel "nBitAdder" $ testNBitAdder (Proxy :: Proxy 4)
     ]
 main :: IO ()
 main = do

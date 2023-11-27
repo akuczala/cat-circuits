@@ -72,8 +72,8 @@ postScanlVecM f b0 as = snd <$> V.ifoldM acc t0 as where
         bNext <- f b a
         return (bNext, bv V.// [(i, bNext)])
 
-specialScanM :: Monad m => (b -> a -> m (b, c)) -> b -> [a] -> m [c]
-specialScanM f b0 [] = return []
+splitScanM :: Monad m => (b -> a -> m (b, c)) -> b -> [a] -> m [c]
+splitScanM f b0 [] = return []
 specialScanM f b0 (a0 : as) = fmap (fmap snd) ts where
     ts = do
         t0 <- f b0 a0
@@ -83,3 +83,4 @@ specialScanM f b0 (a0 : as) = fmap (fmap snd) ts where
 splitScanlVecM :: Monad m => (b -> a -> m (b, c)) -> b -> V.Vector n a -> m (V.Vector n c)
 splitScanlVecM f b0 as  = fmap (fromJust . snd) <$> postScanlVecM acc (b0, Nothing) as where
     acc (b, _) a = fmap (second' Just) (f b a)
+    
