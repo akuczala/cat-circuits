@@ -1,0 +1,34 @@
+digraph G {
+rankdir=TB
+src [
+    shape=plaintext
+    label=<
+    <TABLE
+    BORDER="0"
+    CELLBORDER="0"
+    CELLSPACING="0"
+    CELLPADDING="0"
+    >
+    <TR>
+    <TD>
+    <TABLE
+    BORDER="0"
+    CELLBORDER="0"
+    CELLSPACING="0"
+    CELLPADDING="0"
+    ><TR><TD WIDTH="20"></TD><TD PORT="in1" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in1</FONT></TD><TD WIDTH="10"></TD><TD PORT="in2" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in2</FONT></TD><TD WIDTH="10"></TD><TD PORT="in3" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in3</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR><TR><TD BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR="black">A<BR/><FONT POINT-SIZE="10">node</FONT></TD></TR><TR><TD BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD PORT="out1" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">out1</FONT></TD><TD WIDTH="10"></TD><TD PORT="out2" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">out2</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+
+
+rankdir=TB
+snk [shape=plaintext label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD PORT="in1" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in1</FONT></TD><TD WIDTH="10"></TD><TD PORT="in2" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in2</FONT></TD><TD WIDTH="10"></TD><TD PORT="in3" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">in3</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR><TR><TD BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR="black">B<BR/><FONT POINT-SIZE="10">node</FONT></TD></TR><TR><TD BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD PORT="out1" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">out1</FONT></TD><TD WIDTH="10"></TD><TD PORT="out2" BORDER="1" CELLPADDING="1"><FONT POINT-SIZE="10">out2</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>>];
+
+    snk -> src [style="", arrowhead="vee", color=red, headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, labelfontcolor=black];
+
+    src:out1 -> snk:in1 [style="", arrowhead="normal", color=black, headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, labelfontcolor=black];
+    src:out1 -> snk:in2 [style="", arrowhead="normal", color=black, headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, labelfontcolor=black];
+    src:out2 -> snk:in3 [style="", arrowhead="normal", color=black, headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, labelfontcolor=black];
+
+    {rank=source; src}
+    {rank=sink; snk}
+
+}
