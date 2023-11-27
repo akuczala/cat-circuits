@@ -12,7 +12,9 @@ import Control.Arrow (first)
 import Data.Bifunctor (bimap)
 import Graph
 import Control.Category (Category (..), (>>>))
-import Utils (postScanlVecM)
+import Utils (postScanlVecM, splitScanlVecM)
+import Data.Maybe (fromJust)
+import Control.Arrow (Arrow(second))
 
 class Category k => VecCat k where
     splitHead :: V.Vector (1 + n) a `k` (a, V.Vector n a)
@@ -26,8 +28,9 @@ class Category k => VecCat k where
     zipWithVec :: (a, b) `k` c -> (V.Vector n a, V.Vector n b) `k` V.Vector n c
     zipWithVec f = zipVecs >>> mapVec f
     foldlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` b
-    -- TODO: remove KnownNat constraint
-    postScanlVec :: (KnownNat n) => (b, a) `k` b -> (b, V.Vector n a) `k` V.Vector n b
+    postScanlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` V.Vector n b
+    -- TODO: this should return (b, V.Vector n a) `k` (V.Vector n c, b)
+    splitScanVec :: (b, a) `k` (b, c) -> (b, V.Vector n a) `k` V.Vector n c
 
 instance VecCat (->) where
     splitHead :: V.Vector (1 + n) a -> (a, V.Vector n a)
@@ -42,6 +45,8 @@ instance VecCat (->) where
     mapVec = V.map
     foldlVec f = uncurry $ foldl (curry f)
     postScanlVec f = uncurry $ V.postscanl (curry f)
+    splitScanVec f (b0, as) = fromJust Prelude.. snd <$> postScanlVec acc ((b0, Nothing), as) where
+        acc ((b, _), a) = second Just $ f (b, a)
     
 
 instance VecCat Graph where
@@ -65,3 +70,8 @@ instance VecCat Graph where
         go (b,a) = f (PairP b a)
     postScanlVec (Graph f) = Graph(\(PairP pb (VecP v)) -> VecP <$> postScanlVecM go pb v) where
         go b a = f (PairP b a)
+    splitScanVec (Graph f) = Graph(\(PairP b0 (VecP as)) -> VecP <$> splitScanlVecM go b0 as) where
+        go b a = do
+            x <- f (PairP b a)
+            return $ case x of
+                PairP y z -> (y, z)

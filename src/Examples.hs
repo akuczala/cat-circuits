@@ -1,7 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE FlexibleContexts #-}
 module Examples(
   writeDotExample,
   examples
@@ -18,8 +15,6 @@ import GraphVizUtils (buildDotGraph, serializeDotGraph)
 import Data.Function ((&))
 import VecCat (VecCat(..))
 import qualified Data.Vector.Sized as V
-import Utils (scanVecM)
-import GHC.TypeNats
 
 examples :: [Graph () ()]
 examples = [
@@ -73,15 +68,11 @@ examples = [
   >>> genNode "out",
 
   copy
-  >>> initialNode "x" *** inVec4 "y"
-  >>> test xorC
+  >>> initialNode "c" *** (copy >>> (inVec4 "x" *** inVec4 "y"))
+  >>> nBitAdder (genNode "FADD")
   >>> genNode "out"
   ]
  
-test :: KnownNat (1 + n) => Graph (b, a) b -> Graph (b, V.Vector (1 + n) a) (V.Vector (1 + n) b)
-test (Graph f) = Graph(\(PairP pb (VecP v)) -> VecP <$> scanVecM go pb v) where
-  go b a = f (PairP b a)
-
 
 inVec4 :: (GenPorts a) => String -> Graph () (V.Vector 4 a)
 inVec4= genNode

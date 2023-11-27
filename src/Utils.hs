@@ -1,20 +1,18 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
 module Utils(
     Pair,
     OnlyOne(..),
     addAnother,
     postScanlVecM,
-    scanVecM
+    splitScanlVecM
 ) where
 
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Vector.Sized as V
-import GHC.TypeNats
-import Data.Maybe (fromJust)
 import Control.Monad (foldM)
-import Data.Vector.Generic.Sized (_head)
+import Data.Maybe (fromJust)
+import Control.Category.Monoidal (second')
 
 type Pair a = (a, a)
 
@@ -67,29 +65,12 @@ postScanM f b0 (a:as) = do
     b1 <- f b0 a
     scanM f b1 as
 
--- postScanlVecM :: Monad m => (b -> a -> m b) -> b -> V.Vector n a -> m (V.Vector n b)
--- postScanlVecM f b0 as = sequence $ V.postscanl' acc (return b0) as where
---     acc mb a = do
---         b <- mb
---         f b a
-
--- the KnownNat constraint is needed only for the conversion to and from the list
-postScanlVecM :: (KnownNat n, Monad m) => (b -> a -> m b) -> b -> V.Vector n a -> m (V.Vector n b)
-postScanlVecM f b0 v = fromJust . V.fromList . reverse <$> postScanM f b0 (V.toList v)
-
--- the KnownNat constraint is needed only for replicate to gen init dummy vec
-scanVecM :: (KnownNat n, Monad m) => (b -> a -> m b) -> b -> V.Vector n a -> m (V.Vector n b)
-scanVecM f b0 as = snd <$> V.ifoldM acc (b0, V.replicate b0) as where
+postScanlVecM :: Monad m => (b -> a -> m b) -> b -> V.Vector n a -> m (V.Vector n b)
+postScanlVecM f b0 as = snd <$> V.ifoldM acc t0 as where
+    t0 = (b0, V.map (const b0) as) -- the second term gives us a dummy init vec
     acc (b, bv) i a = do
-        b2 <- f b a
-        return (b2, bv V.// [(i, b2)])
-
--- the KnownNat constraint is needed for enum and replicate
--- scanVecM :: (KnownNat n, Monad m) => (b -> a -> m b) -> b -> V.Vector n a -> m (V.Vector n b)
--- scanVecM f b0 as = snd <$> V.ifoldM acc (b0, V.replicate b0) (V.zip (V.enumFromN 0) as) where
---     acc a i (b, bv) = do
---             b2 <- f b a
---             return (b2, bv V.// [(i, b2)])
+        bNext <- f b a
+        return (bNext, bv V.// [(i, bNext)])
 
 specialScanM :: Monad m => (b -> a -> m (b, c)) -> b -> [a] -> m [c]
 specialScanM f b0 [] = return []
@@ -99,3 +80,6 @@ specialScanM f b0 (a0 : as) = fmap (fmap snd) ts where
         postScanM acc t0 as
     acc (b, _) = f b
 
+splitScanlVecM :: Monad m => (b -> a -> m (b, c)) -> b -> V.Vector n a -> m (V.Vector n c)
+splitScanlVecM f b0 as  = fmap (fromJust . snd) <$> postScanlVecM acc (b0, Nothing) as where
+    acc (b, _) a = fmap (second' Just) (f b a)

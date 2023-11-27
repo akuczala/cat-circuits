@@ -6,7 +6,8 @@ module Circuits(
   intToBoolVecLilEnd,
   halfAdder,
   fullAdder,
-  twoBitAdder
+  twoBitAdder,
+  nBitAdder
 ) where
 import BoolCat
 import Utils
@@ -66,3 +67,12 @@ twoBitAdder fullAdd =
   >>> second' (swap >>> fullAdd)
   >>> reassoc
   >>> first' fromPair
+
+-- TODO: include carry out
+nBitAdder
+  :: (BoolCat k, VecCat k)
+  => k (Bool, Pair Bool) (Pair Bool)
+  -> k (Bool, (V.Vector n Bool, V.Vector n Bool)) (V.Vector n Bool)
+nBitAdder fullAdd
+  = second' zipVecs
+  >>> splitScanVec (fullAdd >>> swap)
