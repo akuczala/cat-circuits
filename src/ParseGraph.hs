@@ -115,7 +115,7 @@ parseNode i (Node name pIn pOut) = NodeData {
 allPorts :: [NodeData] -> [Port]
 allPorts nodes = nub $ concatMap (map wireId . inPorts) nodes
 
-data NodePortData = NodePortData {nodePortNode :: NodeData, nodePortId :: String}
+data NodePortData = NodePortData {nodePortNodeId :: NodeId, nodePortId :: String}
     deriving Show
 
 
@@ -126,7 +126,7 @@ data PortNodes = PortNodes {fromNodePort :: OnlyOne NodePortData, toNodePorts ::
 findPortNodes :: Port -> [NodeData] -> PortNodes
 findPortNodes port = foldl go PortNodes {fromNodePort=NothingYet, toNodePorts=[]} where
     go :: PortNodes -> NodeData -> PortNodes
-    go pNodes node@(NodeData _ _ inPorts outPorts) = case (findMatchingPorts port node inPorts, findMatchingPorts port node outPorts) of
+    go pNodes node@(NodeData _ _ inPorts outPorts) = case (findMatchingPorts port (nodeId node) inPorts, findMatchingPorts port (nodeId node) outPorts) of
         ([], []) -> pNodes
         ([], [nodePort]) -> pNodes {fromNodePort = addAnother nodePort (fromNodePort pNodes)}
         (nodePorts, []) -> pNodes {toNodePorts = nodePorts ++ toNodePorts pNodes}
@@ -134,12 +134,12 @@ findPortNodes port = foldl go PortNodes {fromNodePort=NothingYet, toNodePorts=[]
 
 
 --  note: NodeData is redundant here but we can probably change PortNodes to accept a node id only rather than NodeData
-findMatchingPorts :: Port -> NodeData -> [PortData] -> [NodePortData]
-findMatchingPorts p npd  = mapMaybe go where
+findMatchingPorts :: Port -> NodeId -> [PortData] -> [NodePortData]
+findMatchingPorts p nid  = mapMaybe go where
     go :: PortData -> Maybe NodePortData
     go pData = case wireId pData of
         w | w == p -> Just $ NodePortData {
-            nodePortNode = npd,
+            nodePortNodeId = nid,
             nodePortId = portId pData
         }
         _ -> Nothing

@@ -91,7 +91,7 @@ fancyNode nodeData = DotNode {
 }
 
 nodeString :: NodePortData -> String
-nodeString = nodeIdToString . nodeId . nodePortNode
+nodeString = nodeIdToString . nodePortNodeId
 
 portNodesToEdge :: PortNodes -> [DotEdge String]
 portNodesToEdge pns = map makeEdge (toNodePorts pns) where
