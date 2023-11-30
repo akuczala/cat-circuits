@@ -9,7 +9,7 @@ import Control.Category((>>>))
 import qualified Control.Category as C
 import Control.Category.Monoidal
 import Circuits
-import BoolCat (BoolCat(xorC))
+import BoolCat (BoolCat(..))
 import ParseGraph (translateGraph)
 import GraphVizUtils (buildDotGraph, serializeDotGraph)
 import Data.Function ((&))
@@ -71,7 +71,19 @@ examples = [
   >>> initialNode "cin" *** (copy >>> (genNode "x" *** genNode "y"))
   >>> nBitAdder (genNode "FADD")
   >>> (terminalNode "sum" :: TerminalNode (V.Vector 4 Bool)) *** terminalNode "cout"
+  >>> consume,
+
+  copy
+  >>> true *** false
+  >>> xorC
+  >>> terminalNode "out",
+
+  copy
+  >>> false *** (copy >>> genNode "x" *** true)
+  >>> fullAdder (genNodeFn "HADD" halfAdder)
+  >>> terminalNode "s" *** terminalNode "cout"
   >>> consume
+
   ]
 
 exampleOut :: Graph () () -> [Node]

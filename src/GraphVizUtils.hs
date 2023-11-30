@@ -5,7 +5,7 @@ module GraphVizUtils(
 
 import Data.GraphViz.Attributes.HTML
 import Data.Text.Lazy(pack, unpack)
-import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape, HeadPort, TailPort), Label (HtmlLabel), Shape (..), PortPos (..))
+import Data.GraphViz.Attributes.Complete (PortName(..), Attribute (Label, Shape, HeadPort, TailPort), Label (HtmlLabel, StrLabel), Shape (..), PortPos (..))
 import Data.List (intersperse)
 import Data.GraphViz (DotNode (DotNode, nodeID, nodeAttributes), DotGraph (..), DotStatements (..), PrintDot (toDot), DotEdge (DotEdge))
 import Data.GraphViz.Printing (renderDot)
@@ -13,6 +13,7 @@ import Data.GraphViz.Printing (renderDot)
 import ParseGraph
 import Utils (OnlyOne(..))
 import Graph (Port)
+import qualified Graph as G
 
 toTextLabel :: String -> Data.GraphViz.Attributes.HTML.Label
 toTextLabel s = Text [Str $ pack s]
@@ -95,13 +96,16 @@ nodeString = nodeIdToString . nodePortNodeId
 
 portNodesToEdge :: PortNodes -> [DotEdge String]
 portNodesToEdge pns = map makeEdge (toNodePorts pns) where
-    makeEdge tNode = DotEdge (nodeString fNode) (nodeString tNode) [headPort tNode, tailPort fNode]
+    makeEdge tNode = DotEdge (nodeString fNode) (nodeString tNode) ([headPort tNode, tailPort fNode] ++ labelList)
     fNode = case fromNodePort pns of
         OnlyOne fn -> fn
         NothingYet -> error "INVALID"
         TooMany -> error "INVALID"
     headPort n = HeadPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
     tailPort n = TailPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
+    labelList = case (G.portValue . wirePort) pns of
+        Just b -> [Label . StrLabel . pack . show $ b ]
+        Nothing -> []
 
 minimalDigraph :: [DotNode n] -> [DotEdge n] -> DotGraph n
 minimalDigraph nodes edges = DotGraph {

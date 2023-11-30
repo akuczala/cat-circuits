@@ -22,14 +22,14 @@ instance BoolCat (->) where
   false = const False
 
 instance BoolCat Graph where
-  notC = genNode "not"
-  andC = genNode "and"
-  orC = genNode "or"
-  xorC = genNode "xor"
-  nandC = genNode "nand"
-  norC = genNode "nor"
-  true = genNode "true"
-  false = consume >>> genNode "false"
+  notC = genNodeFn "not" notC
+  andC = genNodeFn "and" andC
+  orC = genNodeFn "or" orC
+  xorC = genNodeFn "xor" xorC
+  nandC = genNodeFn "nand" nandC
+  norC = genNodeFn "nor" norC
+  true = consume >>> genNodeFn "true" (const True)
+  false = consume >>> genNodeFn "false" (const False)
   
 -- using NAND primitives
 -- instance BoolCat Graph where

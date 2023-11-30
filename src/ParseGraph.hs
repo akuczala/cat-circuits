@@ -11,14 +11,14 @@ module ParseGraph (
     NodeLabel(..)
     ) where
 import Data.List (nub)
-import Graph
+import qualified Graph as G
 import Utils
 import Data.Maybe (mapMaybe)
 
 data PortData = PortData {
     portId :: String,
     portLabel :: String,
-    wireId :: Port
+    wire :: G.Port
     } deriving Show
 
 data NodeLabel = NotLabel | OrLabel | AndLabel | XorLabel | HADDLabel | FADDLabel | StringLabel String
@@ -54,12 +54,11 @@ data NodeData = NodeData {
     }
     deriving Show
 
-parsePorts :: Ports a -> [Port]
-parsePorts UnitP = []
-parsePorts (BoolP p) = [p]
-parsePorts (IntP p) = [p]
-parsePorts (PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
-parsePorts (VecP v) = concatMap parsePorts v
+parsePorts :: G.Ports a -> [G.Port]
+parsePorts G.UnitP = []
+parsePorts (G.BoolP p) = [p]
+parsePorts (G.PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
+parsePorts (G.VecP v) = concatMap parsePorts v
 
 getInPortId :: Int -> String
 getInPortId i = "in" ++ show i
@@ -84,24 +83,24 @@ nodeLabelToOutPortNames l i = case l of
         1 -> [" "]
         _ -> map (\x -> "out" ++ show x) [0..]
 
-labelInPorts :: [String] -> [Port] -> [PortData]
+labelInPorts :: [String] -> [G.Port] -> [PortData]
 labelInPorts = zipWith3 go [0..] where
     go i name p = PortData {
-        wireId = p,
+        wire = p,
         portId = getInPortId i,
         portLabel = name
         }
 
-labelOutPorts :: [String] -> [Port] -> [PortData]
+labelOutPorts :: [String] -> [G.Port] -> [PortData]
 labelOutPorts = zipWith3 go [0..] where
     go i name p = PortData {
-        wireId = p,
+        wire = p,
         portId = getOutPortId i,
         portLabel = name
         }
 
-parseNode :: NodeId -> Node -> NodeData
-parseNode i (Node name pIn pOut) = NodeData {
+parseNode :: NodeId -> G.Node -> NodeData
+parseNode i (G.Node name pIn pOut) = NodeData {
     nodeId = i,
     nodeLabel = label,
     inPorts = labelInPorts (nodeLabelToInPortNames label $ length inPorts) inPorts,
@@ -112,19 +111,19 @@ parseNode i (Node name pIn pOut) = NodeData {
         inPorts =  parsePorts pIn
         outPorts = parsePorts pOut
 
-allPorts :: [NodeData] -> [Port]
-allPorts nodes = nub $ concatMap (map wireId . inPorts) nodes
+allPorts :: [NodeData] -> [G.Port]
+allPorts nodes = nub $ concatMap (map wire . inPorts) nodes
 
 data NodePortData = NodePortData {nodePortNodeId :: NodeId, nodePortId :: String}
     deriving Show
 
 
-data PortNodes = PortNodes {fromNodePort :: OnlyOne NodePortData, toNodePorts :: [NodePortData]}
+data PortNodes = PortNodes {fromNodePort :: OnlyOne NodePortData, toNodePorts :: [NodePortData], wirePort :: G.Port}
     deriving Show
 
 -- supports only ports with a single origin and multiple targets
-findPortNodes :: Port -> [NodeData] -> PortNodes
-findPortNodes port = foldl go PortNodes {fromNodePort=NothingYet, toNodePorts=[]} where
+findPortNodes :: G.Port -> [NodeData] -> PortNodes
+findPortNodes port = foldl go PortNodes {fromNodePort=NothingYet, toNodePorts=[], wirePort=port} where
     go :: PortNodes -> NodeData -> PortNodes
     go pNodes node@(NodeData _ _ inPorts outPorts) = case (findMatchingPorts port (nodeId node) inPorts, findMatchingPorts port (nodeId node) outPorts) of
         ([], []) -> pNodes
@@ -132,13 +131,11 @@ findPortNodes port = foldl go PortNodes {fromNodePort=NothingYet, toNodePorts=[]
         (nodePorts, []) -> pNodes {toNodePorts = nodePorts ++ toNodePorts pNodes}
         _ -> error "Cannot have wires connected to both input and output ports of a node, for now."
 
-
---  note: NodeData is redundant here but we can probably change PortNodes to accept a node id only rather than NodeData
-findMatchingPorts :: Port -> NodeId -> [PortData] -> [NodePortData]
+findMatchingPorts :: G.Port -> NodeId -> [PortData] -> [NodePortData]
 findMatchingPorts p nid  = mapMaybe go where
     go :: PortData -> Maybe NodePortData
-    go pData = case wireId pData of
-        w | w == p -> Just $ NodePortData {
+    go pData = case (G.portId . wire) pData of
+        w | w == G.portId p -> Just $ NodePortData {
             nodePortNodeId = nid,
             nodePortId = portId pData
         }
@@ -154,7 +151,7 @@ nodeLabelToShape _ = "ellipse"
 nodeIdToString :: NodeId -> String
 nodeIdToString i = "n" ++ show i
 
-translateGraph :: [Node] -> ([NodeData], [Port])
+translateGraph :: [G.Node] -> ([NodeData], [G.Port])
 translateGraph inNodes = (nodes, ports) where
     nodes = zipWith parseNode [0..] inNodes
     ports = allPorts nodes
