@@ -44,9 +44,10 @@ nodeLabelToString l = case l of
     HADDLabel -> "HADD"
     StringLabel s -> s
 
+type NodeId = Int
 
 data NodeData = NodeData {
-    nodeId :: Int,
+    nodeId :: NodeId,
     nodeLabel :: NodeLabel,
     inPorts :: [PortData],
     outPorts :: [PortData]
@@ -99,7 +100,7 @@ labelOutPorts = zipWith3 go [0..] where
         portLabel = name
         }
 
-parseNode :: Int -> Node -> NodeData
+parseNode :: NodeId -> Node -> NodeData
 parseNode i (Node name pIn pOut) = NodeData {
     nodeId = i,
     nodeLabel = label,
@@ -150,7 +151,7 @@ nodeLabelToShape AndLabel = "invtrapezium"
 nodeLabelToShape _ = "ellipse"
 
 
-nodeIdToString :: Int -> String
+nodeIdToString :: NodeId -> String
 nodeIdToString i = "n" ++ show i
 
 translateGraph :: [Node] -> ([NodeData], [Port])

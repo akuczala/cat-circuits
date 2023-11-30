@@ -10,6 +10,7 @@
 {-# LANGUAGE DataKinds #-}
 module Graph(
   Port,
+  portPairToTuple,
   Node(..),
   Graph(..),
   genNode,
@@ -23,10 +24,12 @@ module Graph(
 ) where
 
 import Control.Monad.State
+    ( State, (<=<), modify, runState, MonadState(put, get) )
 import Control.Applicative (Applicative(liftA2))
 import Control.Arrow (Arrow(second))
 
 import Control.Category as C
+import qualified CustomCats as Cl
 import Control.Category.Cartesian (Cartesian(..))
 import Control.Category.Monoidal (SymmetricProduct(..), MonoidalProduct(..))
 import CustomCats (Bimap(..))
@@ -49,7 +52,7 @@ data Ports a where
     IntP :: Port -> Ports Int
     PairP :: Ports a -> Ports b -> Ports (a, b)
     VecP :: V.Vector n (Ports a) -> Ports (V.Vector n a)
-    -- FunP :: Graph a b -> Ports (a -> b)
+    FunP :: Graph a b -> Ports (a -> b)
 
 -- why does the below fail when I add the constraint Show a ?
 instance Show (Ports a) where
@@ -58,6 +61,10 @@ instance Show (Ports a) where
   show (IntP p) = "IntP " ++ show p
   show (PairP ps1 ps2) = "PairP " ++ show ps1 ++ " " ++ show ps2
   show (VecP ps) = "VecP " ++ show (fmap show ps) -- TODO this likely has too many quotations
+  show (FunP _) = "FunP"
+
+portPairToTuple :: Ports (a, b) -> (Ports a, Ports b)
+portPairToTuple (PairP a b) = (a, b)
 
 type NodeName = String
 
@@ -101,6 +108,17 @@ instance MonoidalProduct Graph where
       y <- f b
       return (PairP a y)
    )
+
+instance Cl.Closed Graph where
+  apply = Graph(\(PairP (FunP (Graph f)) a) -> f a)
+  curry (Graph f) = Graph (\a -> return $ FunP $ Graph $ \b -> f (PairP a b))
+  uncurry (Graph g) = Graph (
+    \(PairP a b) -> x a b
+    ) where
+      x a b = do
+        y <- g a
+        case y of -- need case statement to make haskell happy
+          FunP (Graph f) -> f b
 
 
 genPort :: GraphM Port

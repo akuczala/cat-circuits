@@ -27,6 +27,7 @@ dependencies:
 - graphviz
 - text
 - ghc-typelits-natnormalise
+- finite-typelits
 
 ghc-options:
 - -Wall
