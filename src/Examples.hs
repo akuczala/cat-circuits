@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 module Examples(
   writeDotExample,
   examples
@@ -14,6 +15,7 @@ import ParseGraph (translateGraph)
 import GraphVizUtils (buildDotGraph, serializeDotGraph)
 import Data.Function ((&))
 import VecCat (VecCat(..))
+import qualified CustomCats as Cu
 import qualified Data.Vector.Sized as V
 
 examples :: [Graph () ()]
@@ -79,10 +81,18 @@ examples = [
   >>> terminalNode "out",
 
   copy
-  >>> false *** (copy >>> genNode "x" *** true)
+  >>> false *** (copy >>> true *** true)
   >>> fullAdder (genNodeFn "HADD" halfAdder)
   >>> terminalNode "s" *** terminalNode "cout"
-  >>> consume
+  >>> consume,
+
+  copy
+  >>> false *** (copy >>> ((Cu.const 2 >>> intToBoolVecLilEnd) *** (Cu.const 3 >>> intToBoolVecLilEnd)))
+  >>> nBitAdder (genNodeFn "FADD" (fullAdder halfAdder))
+  >>> (genNodeFn "sum" C.id :: Graph (V.Vector 3 Bool) (V.Vector 3 Bool)) *** genNodeFn "cout" C.id
+  >>> first' VecCat.reverse >>> swap >>> mergeHead >>> VecCat.reverse
+  >>> boolVecToIntLilEnd
+  >>> terminalNode "result"
 
   ]
 

@@ -12,7 +12,7 @@ import Data.GraphViz.Printing (renderDot)
 
 import ParseGraph
 import Utils (OnlyOne(..))
-import Graph (Port)
+import Graph (Port, PortValue (..))
 import qualified Graph as G
 
 toTextLabel :: String -> Data.GraphViz.Attributes.HTML.Label
@@ -104,8 +104,11 @@ portNodesToEdge pns = map makeEdge (toNodePorts pns) where
     headPort n = HeadPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
     tailPort n = TailPort $ LabelledPort (PN . pack . nodePortId $ n) Nothing 
     labelList = case (G.portValue . wirePort) pns of
-        Just b -> [Label . StrLabel . pack . show $ b ]
+        Just val -> [Label . StrLabel . pack . showValue $ val ]
         Nothing -> []
+    showValue val = case val of
+        BoolPortValue b -> show b
+        IntPortValue i -> show i
 
 minimalDigraph :: [DotNode n] -> [DotEdge n] -> DotGraph n
 minimalDigraph nodes edges = DotGraph {

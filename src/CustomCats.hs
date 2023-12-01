@@ -1,7 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 module CustomCats(
     Bimap(..),
-    Closed(..)
+    Closed(..),
+    IntCat(..)
 ) where
 import Control.Category
 
@@ -20,3 +21,9 @@ instance Closed (->) where
     apply (f, x) = f x
     curry = Prelude.curry
     uncurry = Prelude.uncurry
+
+class IntCat k where
+    const :: Int -> k () Int
+
+instance IntCat (->) where
+    const = Prelude.const

@@ -11,6 +11,7 @@
 {-# LANGUAGE KindSignatures #-}
 module Graph(
   Port(..),
+  PortValue(..),
   portPairToTuple,
   Node(..),
   Graph(..),
@@ -31,7 +32,7 @@ import Control.Applicative (Applicative(liftA2))
 import Control.Arrow (Arrow(second))
 
 import Control.Category as C
-import qualified CustomCats as Cl
+import qualified CustomCats as Cu
 import Control.Category.Cartesian (Cartesian(..))
 import Control.Category.Monoidal (SymmetricProduct(..), MonoidalProduct(..))
 import CustomCats (Bimap(..))
@@ -49,11 +50,13 @@ runGraph (Graph f) ports = runState (f ports) initState
 
 type GraphM = State (Port, [Node])
 
-data Port = Port { portId :: Int, portValue :: Maybe Bool} deriving (Show, Eq)
+data Port = Port { portId :: Int, portValue :: Maybe PortValue} deriving Show
+data PortValue = BoolPortValue Bool | IntPortValue Int deriving Show
 
 data Ports :: Type -> Type where
     UnitP :: Ports ()
     BoolP :: Port -> Ports Bool
+    IntP :: Port -> Ports Int
     PairP :: Ports a -> Ports b -> Ports (a, b)
     VecP :: V.Vector n (Ports a) -> Ports (V.Vector n a)
     FunP :: Graph a b -> Ports (a -> b)
@@ -62,6 +65,7 @@ data Ports :: Type -> Type where
 instance Show (Ports a) where
   show UnitP = "UnitP"
   show (BoolP p) = "BoolP " ++ show p
+  show (IntP p) = "IntP" ++ show p
   show (PairP ps1 ps2) = "PairP ( " ++ show ps1 ++ ", " ++ show ps2 ++ " )"
   show (VecP ps) = "VecP " ++ show (fmap show ps) -- TODO this likely has too many quotations
   show (FunP _) = "FunP"
@@ -69,17 +73,17 @@ instance Show (Ports a) where
 portPairToTuple :: Ports (a, b) -> (Ports a, Ports b)
 portPairToTuple (PairP a b) = (a, b)
 
-unpackPorts :: Ports a -> Maybe a
-unpackPorts ps = case ps of
+unpackPortValues :: Ports a -> Maybe a
+unpackPortValues ps = case ps of
   UnitP -> Just ()
-  BoolP p -> portValue p
+  BoolP p -> fmap (\(BoolPortValue b) -> b) (portValue p)
+  IntP p -> fmap (\(IntPortValue i) -> i) (portValue p)
   PairP p1 p2 -> do
-    v1 <- unpackPorts p1
-    v2 <- unpackPorts p2
+    v1 <- unpackPortValues p1
+    v2 <- unpackPortValues p2
     return (v1, v2)
-  VecP v -> V.mapM unpackPorts v
+  VecP v -> V.mapM unpackPortValues v
   FunP (Graph _) -> Nothing
-  
 
 
 type NodeName = String
@@ -125,7 +129,7 @@ instance MonoidalProduct Graph where
       return (PairP a y)
    )
 
-instance Cl.Closed Graph where
+instance Cu.Closed Graph where
   apply = Graph(\(PairP (FunP (Graph f)) a) -> f a)
   curry (Graph f) = Graph (\a -> return $ FunP $ Graph $ \b -> f (PairP a b))
   uncurry (Graph g) = Graph (
@@ -136,8 +140,10 @@ instance Cl.Closed Graph where
         case y of -- need case statement to make haskell happy
           FunP (Graph f) -> f b
 
+instance Cu.IntCat Graph where
+  const i = genNodeFn (show i) (const i)
 
-genPort :: Maybe Bool ->  GraphM Port
+genPort :: Maybe PortValue ->  GraphM Port
 genPort newValue = do
     (Port o _oldValue, nodes) <- get
     put (Port (o + 1) newValue, nodes)
@@ -150,7 +156,10 @@ instance GenPorts () where
   genPorts _ = return UnitP
 
 instance GenPorts Bool where
-  genPorts b = fmap BoolP (genPort b)
+  genPorts b = fmap BoolP (genPort $ fmap BoolPortValue b)
+
+instance GenPorts Int where
+  genPorts i = fmap IntP (genPort $ fmap IntPortValue i)
 
 instance (GenPorts a, GenPorts b) => GenPorts (a, b) where
   genPorts pair = liftA2 PairP (genPorts $ fmap fst pair) (genPorts $ fmap snd pair)
@@ -173,7 +182,7 @@ genNode name = Graph (
 genNodeFn :: GenPorts b => String -> (a -> b) -> Graph a b
 genNodeFn name f = Graph (
   \a -> do
-    b <- genPorts $ fmap f (unpackPorts a)
+    b <- genPorts $ fmap f (unpackPortValues a)
     modify (second (Node name a b :))
     return b
   )

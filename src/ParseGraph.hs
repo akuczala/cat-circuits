@@ -10,7 +10,7 @@ module ParseGraph (
     PortNodes(..),
     NodeLabel(..)
     ) where
-import Data.List (nub)
+import Data.List (nub, nubBy)
 import qualified Graph as G
 import Utils
 import Data.Maybe (mapMaybe)
@@ -57,6 +57,7 @@ data NodeData = NodeData {
 parsePorts :: G.Ports a -> [G.Port]
 parsePorts G.UnitP = []
 parsePorts (G.BoolP p) = [p]
+parsePorts (G.IntP p) = [p]
 parsePorts (G.PairP ps1 ps2) = parsePorts ps1 ++ parsePorts ps2
 parsePorts (G.VecP v) = concatMap parsePorts v
 
@@ -112,7 +113,7 @@ parseNode i (G.Node name pIn pOut) = NodeData {
         outPorts = parsePorts pOut
 
 allPorts :: [NodeData] -> [G.Port]
-allPorts nodes = nub $ concatMap (map wire . inPorts) nodes
+allPorts nodes = nubBy (\p1 p2 -> G.portId p1 == G.portId p2) $ concatMap (map wire . inPorts) nodes
 
 data NodePortData = NodePortData {nodePortNodeId :: NodeId, nodePortId :: String}
     deriving Show

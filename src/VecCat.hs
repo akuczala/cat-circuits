@@ -32,6 +32,7 @@ class Category k => VecCat k where
     foldlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` b
     postScanlVec :: (b, a) `k` b -> (b, V.Vector n a) `k` V.Vector n b
     splitScanVec :: (b, a) `k` (b, c) -> (b, V.Vector n a) `k` (V.Vector n c, b)
+    reverse :: V.Vector n a `k` V.Vector n a
     
 instance VecCat (->) where
     indexVec = flip V.index
@@ -50,7 +51,7 @@ instance VecCat (->) where
     splitScanVec f (b0, as) = extract $ postScanlVec acc ((b0, Nothing), as) where
         acc ((b, _), a) = second Just $ f (b, a)
         extract bcv = (fmap (fromJust Prelude.. snd) bcv, V.last (V.cons b0 (fmap fst bcv)))
-    
+    reverse = V.reverse
 
 instance VecCat Graph where
     indexVec i = Graph(\(VecP v) -> return $ V.index v i )
@@ -77,3 +78,4 @@ instance VecCat Graph where
             return $ case x of
                 PairP y z -> (y, z)
         extract (cs, b) = PairP (VecP cs) b
+    reverse = Graph(\(VecP v) -> return Prelude.. VecP Prelude.. V.reverse $ v)
