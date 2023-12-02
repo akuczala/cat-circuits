@@ -71,7 +71,7 @@ twoBitAdder
   => k (Bool, Pair Bool) (Pair Bool)
   -> k (Bool, (V.Vector 2 Bool, V.Vector 2 Bool)) (V.Vector 2 Bool, Bool)
 twoBitAdder fullAdd =
-  second' (zipVecs >>> toPair)
+  second' (VecCat.zip >>> toPair)
   >>> reassoc
   >>> first' (fullAdd >>> swap)
   >>> swap >>> reassoc >>> swap
@@ -85,5 +85,5 @@ nBitAdder
   => k (Bool, Pair Bool) (Pair Bool)
   -> k (Bool, (V.Vector n Bool, V.Vector n Bool)) (V.Vector n Bool, Bool)
 nBitAdder fullAdd
-  = second' zipVecs
-  >>> splitScanVec (fullAdd >>> swap)
+  = second' VecCat.zip
+  >>> splitScan (fullAdd >>> swap)

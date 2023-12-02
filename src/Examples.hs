@@ -55,18 +55,18 @@ examples = [
 
   copy
   >>> initialNode "x" *** initialNode "y"
-  >>> zipVecs
-  >>> mapVec xorC
+  >>> VecCat.zip
+  >>> VecCat.map xorC
   >>> (genNode "out" :: TerminalNode (V.Vector 4 Bool)),
   
   copy
   >>> initialNode "x" *** (initialNode "y" :: InitialNode (V.Vector 4 Bool))
-  >>> foldlVec xorC
+  >>> VecCat.foldl xorC
   >>> genNode "out",
 
   copy
   >>> initialNode "x" *** initialNode "y"
-  >>> postScanlVec xorC
+  >>> postScanl xorC
   >>> (terminalNode "out"  :: TerminalNode (V.Vector 4 Bool)),
 
   copy
