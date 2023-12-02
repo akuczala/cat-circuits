@@ -92,7 +92,15 @@ examples = [
   >>> (genNodeFn "sum" C.id :: Graph (V.Vector 3 Bool) (V.Vector 3 Bool)) *** genNodeFn "cout" C.id
   >>> first' VecCat.reverse >>> swap >>> mergeHead >>> VecCat.reverse
   >>> boolVecToIntLilEnd
-  >>> terminalNode "result"
+  >>> terminalNode "result",
+
+  copy
+  >>> true *** Cu.const 0
+  >>> second' intToBoolVecLilEnd
+  >>> counter halfAdder >>> swap >>> first' true >>> counter halfAdder
+  >>> (boolVecToIntLilEnd :: Graph (V.Vector 3 Bool) Int) *** C.id
+  >>> terminalNode "out" *** terminalNode "carry"
+  >>> consume
 
   ]
 

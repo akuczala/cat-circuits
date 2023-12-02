@@ -7,6 +7,7 @@ module VecCat(
     VecCat(..)
 ) where
 
+import Prelude hiding ((.))
 import qualified Data.Vector.Sized as V
 import GHC.TypeNats
 import Data.Bifunctor (bimap)
@@ -18,6 +19,7 @@ import Control.Arrow (Arrow(first, second))
 import Data.Finite (Finite)
 
 class Category k => VecCat k where
+    init :: V.Vector (n + 1) a `k` V.Vector n a
     index :: Finite n -> V.Vector n a `k` a
     splitHead :: V.Vector (1 + n) a `k` (a, V.Vector n a)
     mergeHead :: (a, V.Vector n a) `k` V.Vector (1 + n) a
@@ -35,6 +37,7 @@ class Category k => VecCat k where
     reverse :: V.Vector n a `k` V.Vector n a
 
 instance VecCat (->) where
+    init = V.init
     index = flip V.index
     splitHead :: V.Vector (1 + n) a -> (a, V.Vector n a)
     splitHead v = first V.head (V.splitAt v)
@@ -50,7 +53,7 @@ instance VecCat (->) where
     postScanl f = uncurry $ V.postscanl (curry f)
     splitScan f (b0, as) = extract $ postScanl acc ((b0, Nothing), as) where
         acc ((b, _), a) = second Just $ f (b, a)
-        extract bcv = (fmap (fromJust Prelude.. snd) bcv, V.last (V.cons b0 (fmap fst bcv)))
+        extract bcv = (fmap (fromJust . snd) bcv, V.last (V.cons b0 (fmap fst bcv)))
     reverse = V.reverse
 
 
@@ -58,6 +61,7 @@ liftVec :: (V.Vector n (Ports a) -> Ports b) -> Graph (V.Vector n a) b
 liftVec f = Graph $ \(VecP v) -> return (f v)
 
 instance VecCat Graph where
+    init = liftVec (VecP . V.init)
     index i = liftVec (`V.index` i)
     splitHead = liftVec f where
         f v = PairP x (VecP y)
@@ -66,8 +70,8 @@ instance VecCat Graph where
     flatOne = liftVec flatOne
     vanishNone :: Graph (V.Vector 0 a) ()
     vanishNone = liftVec (const UnitP)
-    fromPair = Graph (\(PairP x y) -> return $ VecP $ fromPair (x, y))
-    toPair = Graph (\(VecP v) -> return $ uncurry PairP $ toPair v)
+    fromPair = Graph (\(PairP x y) -> return . VecP . fromPair $ (x, y))
+    toPair = Graph (\(VecP v) -> return . uncurry PairP . toPair $ v)
     zip = Graph (\(PairP (VecP v1) (VecP v2)) -> return $ VecP $ V.zipWith PairP v1 v2)
     map (Graph f) = Graph (\(VecP v) -> go v) where
         go v = do
@@ -83,4 +87,4 @@ instance VecCat Graph where
             return $ case x of
                 PairP y z -> (y, z)
         extract (cs, b) = PairP (VecP cs) b
-    reverse = liftVec (VecP Prelude.. VecCat.reverse)
+    reverse = liftVec (VecP . VecCat.reverse)

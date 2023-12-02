@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module Circuits(
   BoolVecCat,
   boolVecToIntLilEnd,
@@ -9,7 +10,8 @@ module Circuits(
   halfAdder,
   fullAdder,
   twoBitAdder,
-  nBitAdder
+  nBitAdder,
+  counter
 ) where
 import BoolCat
 import Utils
@@ -87,3 +89,10 @@ nBitAdder
 nBitAdder fullAdd
   = second' VecCat.zip
   >>> splitScan (fullAdd >>> swap)
+
+counter
+  :: (BoolCat k, VecCat k)
+  => k (Pair Bool) (Pair Bool)
+  -> k (Bool, V.Vector n Bool) (V.Vector n Bool, Bool)
+counter halfAdd
+  = splitScan (halfAdd >>> swap)
