@@ -4,7 +4,7 @@ import Examples (writeDotExample, examples)
 import Control.Monad (zipWithM_)
 
 fileNames :: [String]
-fileNames = map (\i -> "graphs/example" ++ show i ++ ".gv") [0..]
+fileNames = map (\i -> "graphs/example" ++ show i ++ ".gv") ([0..] :: [Integer])
 
 main :: IO ()
 main = do

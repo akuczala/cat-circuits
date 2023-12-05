@@ -11,10 +11,10 @@
 {-# LANGUAGE KindSignatures #-}
 module Graph(
   Port(..),
-  PortValue(..),
   portPairToTuple,
   Node(..),
   Graph(..),
+  PortIndex,
   genNode,
   genNodeFn,
   GenPorts,
@@ -43,20 +43,21 @@ import GHC.Base (Type)
 
 newtype Graph a b = Graph (Ports a -> GraphM (Ports b))
 
-initState :: (Port, [Node])
-initState = (Port 0 Nothing, [])
-runGraph :: Graph a b -> Ports a -> (Ports b, (Port, [Node]))
+initState :: (PortIndex, [Node])
+initState = (0, [])
+runGraph :: Graph a b -> Ports a -> (Ports b, (PortIndex, [Node]))
 runGraph (Graph f) ports = runState (f ports) initState
 
-type GraphM = State (Port, [Node])
+type PortIndex = Int
+type GraphM = State (PortIndex, [Node])
 
-data Port = Port { portId :: Int, portValue :: Maybe PortValue} deriving Show
-data PortValue = BoolPortValue Bool | IntPortValue Int deriving Show
+data Port a = Port { portId :: PortIndex, portValue :: Maybe a} deriving Show
 
 data Ports :: Type -> Type where
     UnitP :: Ports ()
-    BoolP :: Port -> Ports Bool
-    IntP :: Port -> Ports Int
+    BoolP :: Port Bool -> Ports Bool
+    IntP :: Port Int -> Ports Int
+    -- FiniteP :: Proxy n -> Port -> Ports (Finite n)
     PairP :: Ports a -> Ports b -> Ports (a, b)
     VecP :: V.Vector n (Ports a) -> Ports (V.Vector n a)
     FunP :: Graph a b -> Ports (a -> b)
@@ -66,6 +67,7 @@ instance Show (Ports a) where
   show UnitP = "UnitP"
   show (BoolP p) = "BoolP " ++ show p
   show (IntP p) = "IntP" ++ show p
+  -- show (FiniteP _ p) = "FiniteP" ++ show p
   show (PairP ps1 ps2) = "PairP ( " ++ show ps1 ++ ", " ++ show ps2 ++ " )"
   show (VecP ps) = "VecP " ++ show (fmap show ps) -- TODO this likely has too many quotations
   show (FunP _) = "FunP"
@@ -76,8 +78,9 @@ portPairToTuple (PairP a b) = (a, b)
 unpackPortValues :: Ports a -> Maybe a
 unpackPortValues ps = case ps of
   UnitP -> Just ()
-  BoolP p -> fmap (\(BoolPortValue b) -> b) (portValue p)
-  IntP p -> fmap (\(IntPortValue i) -> i) (portValue p)
+  BoolP p -> portValue p
+  IntP p -> portValue p
+  --FiniteP _ p -> fmap (\(FinitePortValue i) -> i) (portValue p)
   PairP p1 p2 -> do
     v1 <- unpackPortValues p1
     v2 <- unpackPortValues p2
@@ -143,10 +146,10 @@ instance Cu.Closed Graph where
 instance Cu.IntCat Graph where
   const i = genNodeFn (show i) (const i)
 
-genPort :: Maybe PortValue ->  GraphM Port
+genPort :: Maybe a ->  GraphM (Port a)
 genPort newValue = do
-    (Port o _oldValue, nodes) <- get
-    put (Port (o + 1) newValue, nodes)
+    (o, nodes) <- get
+    put (o + 1, nodes)
     return $ Port o newValue
 
 class GenPorts a where
@@ -156,10 +159,10 @@ instance GenPorts () where
   genPorts _ = return UnitP
 
 instance GenPorts Bool where
-  genPorts b = fmap BoolP (genPort $ fmap BoolPortValue b)
+  genPorts b = fmap BoolP (genPort b)
 
 instance GenPorts Int where
-  genPorts i = fmap IntP (genPort $ fmap IntPortValue i)
+  genPorts i = fmap IntP (genPort i)
 
 instance (GenPorts a, GenPorts b) => GenPorts (a, b) where
   genPorts pair = liftA2 PairP (genPorts $ fmap fst pair) (genPorts $ fmap snd pair)
